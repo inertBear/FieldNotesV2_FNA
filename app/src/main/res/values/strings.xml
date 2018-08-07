@@ -1,0 +1,28 @@
+<resources>
+    <!--Login Strings-->
+    <string name="app_name">FieldNotes</string>
+    <string name="app_platform">Android</string>
+    <string name="login_title_label">Login</string>
+    <string name="login_username_label">Username</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_button">Submit</string>
+    <string name="copyright">© 2017-2018 FieldNotes</string>
+    <string name="empty_field">--</string>
+
+    <string-array name="location_code">
+        <item>Office</item>
+        <item>Field</item>
+        <item>Shop</item>
+        <item>N/A</item>
+        <item>Location</item>
+    </string-array>
+
+    <string-array name="billing_code">
+        <item>Billable</item>
+        <item>Not Billable</item>
+        <item>Turn-key</item>
+        <item>N/A</item>
+        <item>Billing</item>
+    </string-array>
+
+</resources>

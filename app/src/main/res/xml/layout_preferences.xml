@@ -1,0 +1,17 @@
+<android.support.v7.preference.PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.v7.preference.PreferenceCategory
+        android:title="App Preferences">
+
+        <android.support.v7.preference.SwitchPreferenceCompat
+            android:key="remember_login"
+            android:title="Remember Login"
+            android:defaultValue="true" />
+
+    </android.support.v7.preference.PreferenceCategory>
+
+    <android.support.v7.preference.PreferenceCategory
+        android:title="User Preferences"/>
+
+</android.support.v7.preference.PreferenceScreen>
