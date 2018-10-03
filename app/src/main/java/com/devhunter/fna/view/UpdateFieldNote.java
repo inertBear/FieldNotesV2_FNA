@@ -3,6 +3,7 @@ package com.devhunter.fna.view;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -40,13 +41,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+import static com.devhunter.fna.view.Login.PREFS_NAME;
+import static com.devhunter.fna.view.Login.PREF_CUSTOMER_KEY;
+
 /**
  * Created by DevHunter on 5/8/2018.
  */
 
 public class UpdateFieldNote extends Fragment {
 
-    private static final String UPDATE_NOTE_URL = "http://www.fieldnotesfn.com/FieldNotesAndroid_CustomWebService_PHP/FieldNotes_updateNote_android_5_8_2018.php";
+    private static final String UPDATE_NOTE_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_updateNote.php";
     private static final String TAG_SUCCESS = "success";
     private static final String TAG_MESSAGE = "message";
     // there is no way to implement a "spinner hint" with using an Android resource array
@@ -292,6 +297,10 @@ public class UpdateFieldNote extends Fragment {
             String billingCode = mBillingCode.getSelectedItem().toString();
             String location = mLocation.getSelectedItem().toString();
 
+            //get customer key from preferences
+            SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+
             try {
                 //build FieldNote
                 fieldNote = new FieldNote.FieldNoteBuilder()
@@ -341,6 +350,8 @@ public class UpdateFieldNote extends Fragment {
                 }
                 params.add(new BasicNameValuePair("gps", mCurrentLocation));
                 params.add(new BasicNameValuePair("ticketNumber", mOldData.get("ticket")));
+
+                params.add(new BasicNameValuePair("customerKey", customerKey));
 
                 try {
                     //send params and get JSONObject response

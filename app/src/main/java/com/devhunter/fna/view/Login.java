@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -30,6 +31,8 @@ public class Login extends AppCompatActivity {
     public static final String PREFS_NAME = "fnPrefFile";
     private static final String PREF_USERNAME = "username";
     private static final String PREF_PASSWORD = "password";
+    public static final String PREF_CUSTOMER_KEY = "customerkey";
+    private static final String CUSTOMER_KEY = "1234567890";
     public static String mUserName = "";
     // AsyncTask
     private ProgressDialog mProgressDialog;
@@ -105,6 +108,7 @@ public class Login extends AppCompatActivity {
                     .edit()
                     .putString(PREF_USERNAME, mUserNameET.getText().toString())
                     .putString(PREF_PASSWORD, mPasswordET.getText().toString())
+                    .putString(PREF_CUSTOMER_KEY, CUSTOMER_KEY)
                     .apply();
         }
 
@@ -120,12 +124,17 @@ public class Login extends AppCompatActivity {
             // get login strings
             String username = mUserNameET.getText().toString();
             String password = mPasswordET.getText().toString();
+
+            //get customer key from preferences
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+
             try {
                 // convert to List of params
                 List<NameValuePair> params = new ArrayList<NameValuePair>();
                 params.add(new BasicNameValuePair("username", username));
                 params.add(new BasicNameValuePair("password", password));
-                params.add(new BasicNameValuePair("customerKey", "1234567890"));
+                params.add(new BasicNameValuePair("customerKey", customerKey));
                 // make HTTP connection
                 JSONObject json = mJsonParser.createHttpRequest(LOGIN_URL, "POST", params);
                 success = json.getInt(TAG_SUCCESS);
