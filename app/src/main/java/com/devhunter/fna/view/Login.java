@@ -24,7 +24,7 @@ import java.util.List;
 
 public class Login extends AppCompatActivity {
     // static strings
-    private static final String LOGIN_URL = "http://www.fieldnotesfn.com/FieldNotesAndroid_CustomWebService_PHP/FieldNotes_login_android_5_2_2018.php";
+    private static final String LOGIN_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_login.php";
     private static final String TAG_SUCCESS = "success";
     private static final String TAG_MESSAGE = "message";
     public static final String PREFS_NAME = "fnPrefFile";
@@ -125,6 +125,7 @@ public class Login extends AppCompatActivity {
                 List<NameValuePair> params = new ArrayList<NameValuePair>();
                 params.add(new BasicNameValuePair("username", username));
                 params.add(new BasicNameValuePair("password", password));
+                params.add(new BasicNameValuePair("customerKey", "1234567890"));
                 // make HTTP connection
                 JSONObject json = mJsonParser.createHttpRequest(LOGIN_URL, "POST", params);
                 success = json.getInt(TAG_SUCCESS);
