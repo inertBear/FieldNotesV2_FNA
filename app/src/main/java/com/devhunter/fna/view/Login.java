@@ -26,7 +26,7 @@ import java.util.List;
 public class Login extends AppCompatActivity {
     // static strings
     private static final String LOGIN_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_login.php";
-    private static final String TAG_SUCCESS = "success";
+    private static final String TAG_STATUS = "status";
     private static final String TAG_MESSAGE = "message";
     public static final String PREFS_NAME = "fnPrefFile";
     private static final String PREF_USERNAME = "username";
@@ -120,7 +120,7 @@ public class Login extends AppCompatActivity {
          */
         @Override
         protected String doInBackground(String... args) {
-            int success;
+            String status;
             // get login strings
             String username = mUserNameET.getText().toString();
             String password = mPasswordET.getText().toString();
@@ -131,15 +131,15 @@ public class Login extends AppCompatActivity {
 
             try {
                 // convert to List of params
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
+                List<NameValuePair> params = new ArrayList<>();
                 params.add(new BasicNameValuePair("username", username));
                 params.add(new BasicNameValuePair("password", password));
                 params.add(new BasicNameValuePair("customerKey", customerKey));
                 // make HTTP connection
                 JSONObject json = mJsonParser.createHttpRequest(LOGIN_URL, "POST", params);
-                success = json.getInt(TAG_SUCCESS);
+                status = json.getString(TAG_STATUS);
                 // check return value from PHP
-                if (success == 1) {
+                if (status.equals("success")) {
                     // successful Login
                     Intent ii = new Intent(Login.this, Welcome.class);
                     startActivity(ii);
