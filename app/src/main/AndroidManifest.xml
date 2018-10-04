@@ -10,6 +10,14 @@
         android:theme="@style/AppTheme">
         <!-- android:roundIcon="@mipmap/ic_launcher_round" -->
 
+        <activity android:name=".view.RegisterProduct"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".view.Login"
             android:configChanges="orientation"
             android:screenOrientation="portrait">

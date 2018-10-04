@@ -75,20 +75,25 @@ public class Login extends AppCompatActivity {
                     case R.id.LoginButton:
                         new AttemptLogin().execute();
                         break;
-                    //case R.id.RegisterButton:
-                    //new AttemptRegister().execute();
                     default:
                         break;
                 }
             }
         });
+
+        //get customer key from preferences
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+        if(customerKey.isEmpty()){
+            Intent openRegisterActivity = new Intent(Login.this, RegisterProduct.class);
+            startActivity(openRegisterActivity);
+        }
     }
 
     /**
      * Asynchornous login with a progress bar running on the UI thread to show the user that
      * the login mInputStream 'working'
      */
-
     class AttemptLogin extends AsyncTask<String, String, String> {
         /**
          * Before starting background thread Show Progress Dialog
@@ -108,7 +113,6 @@ public class Login extends AppCompatActivity {
                     .edit()
                     .putString(PREF_USERNAME, mUserNameET.getText().toString())
                     .putString(PREF_PASSWORD, mPasswordET.getText().toString())
-                    .putString(PREF_CUSTOMER_KEY, CUSTOMER_KEY)
                     .apply();
         }
 

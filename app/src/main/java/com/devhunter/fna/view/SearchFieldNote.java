@@ -45,7 +45,7 @@ import static com.devhunter.fna.view.Login.PREF_CUSTOMER_KEY;
 public class SearchFieldNote extends Fragment {
     // static Strings
     private static final String SEARCH_NOTE_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_searchNote.php";
-    private static final String TAG_SUCCESS = "success";
+    private static final String TAG_SUCCESS = "status";
     private static final String TAG_MESSAGE = "message";
     // JSON parser
     private ProgressDialog mProgressDialog;
@@ -142,11 +142,10 @@ public class SearchFieldNote extends Fragment {
 
             try {
                 //create and add search params
-                params = new ArrayList<NameValuePair>();
+                params = new ArrayList<>();
                 params.add(new BasicNameValuePair("userName", Login.getLoggedInUser()));
                 params.add(new BasicNameValuePair("dateStart", FNValidate.validateDateTime(mDateStart.getText().toString())));
                 params.add(new BasicNameValuePair("dateEnd", FNValidate.validateDateTime(mDateEnd.getText().toString())));
-
                 params.add(new BasicNameValuePair("customerKey", customerKey));
             } catch (final Exception e) {
                 getActivity().runOnUiThread(new Runnable() {
@@ -160,12 +159,12 @@ public class SearchFieldNote extends Fragment {
             }
 
             if(params != null) {
-                if (params.size() == 3) {
+                if (params.size() == 4) {
                     try {
                         //array of search values
                         JSONObject json = mJsonParser.createHttpRequest(SEARCH_NOTE_URL, "POST", params);
-                        int success = json.getInt(TAG_SUCCESS);
-                        if (success == 1) {
+                        String status = json.getString(TAG_SUCCESS);
+                        if (status.equals("success")) {
                             //get Json object that is inside of the 'message'
                             JSONArray tickets = new JSONArray(json.getString(TAG_MESSAGE));
                             if (tickets.length() > 0) {

@@ -52,7 +52,7 @@ import static com.devhunter.fna.view.Login.PREF_CUSTOMER_KEY;
 public class UpdateFieldNote extends Fragment {
 
     private static final String UPDATE_NOTE_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_updateNote.php";
-    private static final String TAG_SUCCESS = "success";
+    private static final String TAG_STATUS = "status";
     private static final String TAG_MESSAGE = "message";
     // there is no way to implement a "spinner hint" with using an Android resource array
     private final String[] locationArray = new String[]{"Field", "Office", "Shop", "N/A", "Location"};
@@ -280,7 +280,7 @@ public class UpdateFieldNote extends Fragment {
 
         @Override
         protected String doInBackground(String... strings) {
-            int success;
+            String status;
             FieldNote fieldNote = null;
 
             //get values from view
@@ -356,8 +356,8 @@ public class UpdateFieldNote extends Fragment {
                 try {
                     //send params and get JSONObject response
                     JSONObject json = mJsonParser.createHttpRequest(UPDATE_NOTE_URL, "POST", params);
-                    success = json.getInt(TAG_SUCCESS);
-                    if (success == 1) {
+                    status = json.getString(TAG_STATUS);
+                    if (status.equals("success")) {
                         // return to default activity
                         Intent ii = new Intent(getActivity(), Welcome.class);
                         startActivity(ii);
