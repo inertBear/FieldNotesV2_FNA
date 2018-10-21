@@ -55,7 +55,7 @@ public class Login extends AppCompatActivity {
 
         // check preferences and auto-fill login form
         SharedPreferences pref = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        boolean autolog = pref.getBoolean("RememberLogin", false);
+        boolean autolog = pref.getBoolean("remember_login", false);
         String username = pref.getString(PREF_USERNAME, null);
         String password = pref.getString(PREF_PASSWORD, null);
         if (autolog) {
