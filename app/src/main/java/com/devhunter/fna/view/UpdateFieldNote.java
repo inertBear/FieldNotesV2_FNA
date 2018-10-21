@@ -3,6 +3,7 @@ package com.devhunter.fna.view;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -40,14 +41,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+import static com.devhunter.fna.view.Login.PREFS_NAME;
+import static com.devhunter.fna.view.Login.PREF_CUSTOMER_KEY;
+
 /**
  * Created by DevHunter on 5/8/2018.
  */
 
 public class UpdateFieldNote extends Fragment {
 
-    private static final String UPDATE_NOTE_URL = "http://www.fieldnotesfn.com/FieldNotesAndroid_CustomWebService_PHP/FieldNotes_updateNote_android_5_8_2018.php";
-    private static final String TAG_SUCCESS = "success";
+    private static final String UPDATE_NOTE_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_updateNote.php";
+    private static final String TAG_STATUS = "status";
     private static final String TAG_MESSAGE = "message";
     // there is no way to implement a "spinner hint" with using an Android resource array
     private final String[] locationArray = new String[]{"Field", "Office", "Shop", "N/A", "Location"};
@@ -275,7 +280,7 @@ public class UpdateFieldNote extends Fragment {
 
         @Override
         protected String doInBackground(String... strings) {
-            int success;
+            String status;
             FieldNote fieldNote = null;
 
             //get values from view
@@ -291,6 +296,10 @@ public class UpdateFieldNote extends Fragment {
             String project = mProjectName.getText().toString();
             String billingCode = mBillingCode.getSelectedItem().toString();
             String location = mLocation.getSelectedItem().toString();
+
+            //get customer key from preferences
+            SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
 
             try {
                 //build FieldNote
@@ -342,11 +351,13 @@ public class UpdateFieldNote extends Fragment {
                 params.add(new BasicNameValuePair("gps", mCurrentLocation));
                 params.add(new BasicNameValuePair("ticketNumber", mOldData.get("ticket")));
 
+                params.add(new BasicNameValuePair("customerKey", customerKey));
+
                 try {
                     //send params and get JSONObject response
                     JSONObject json = mJsonParser.createHttpRequest(UPDATE_NOTE_URL, "POST", params);
-                    success = json.getInt(TAG_SUCCESS);
-                    if (success == 1) {
+                    status = json.getString(TAG_STATUS);
+                    if (status.equals("success")) {
                         // return to default activity
                         Intent ii = new Intent(getActivity(), Welcome.class);
                         startActivity(ii);

@@ -1,6 +1,7 @@
 package com.devhunter.fna.view;
 
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -33,14 +34,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+import static com.devhunter.fna.view.Login.PREFS_NAME;
+import static com.devhunter.fna.view.Login.PREF_CUSTOMER_KEY;
+
 /**
  * Created on 5/3/2018.
  */
 
 public class SearchFieldNote extends Fragment {
     // static Strings
-    private static final String SEARCH_NOTE_URL = "http://www.fieldnotesfn.com/FieldNotesAndroid_CustomWebService_PHP/FieldNotes_searchNote_android_5_7_2018.php";
-    private static final String TAG_SUCCESS = "success";
+    private static final String SEARCH_NOTE_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_searchNote.php";
+    private static final String TAG_SUCCESS = "status";
     private static final String TAG_MESSAGE = "message";
     // JSON parser
     private ProgressDialog mProgressDialog;
@@ -130,12 +135,18 @@ public class SearchFieldNote extends Fragment {
         protected String doInBackground(String... strings) {
             String searchResultMessage = "";
             List<NameValuePair> params = null;
+
+            //get customer key from preferences
+            SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+
             try {
                 //create and add search params
-                params = new ArrayList<NameValuePair>();
+                params = new ArrayList<>();
                 params.add(new BasicNameValuePair("userName", Login.getLoggedInUser()));
                 params.add(new BasicNameValuePair("dateStart", FNValidate.validateDateTime(mDateStart.getText().toString())));
                 params.add(new BasicNameValuePair("dateEnd", FNValidate.validateDateTime(mDateEnd.getText().toString())));
+                params.add(new BasicNameValuePair("customerKey", customerKey));
             } catch (final Exception e) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -148,12 +159,12 @@ public class SearchFieldNote extends Fragment {
             }
 
             if(params != null) {
-                if (params.size() == 3) {
+                if (params.size() == 4) {
                     try {
                         //array of search values
                         JSONObject json = mJsonParser.createHttpRequest(SEARCH_NOTE_URL, "POST", params);
-                        int success = json.getInt(TAG_SUCCESS);
-                        if (success == 1) {
+                        String status = json.getString(TAG_SUCCESS);
+                        if (status.equals("success")) {
                             //get Json object that is inside of the 'message'
                             JSONArray tickets = new JSONArray(json.getString(TAG_MESSAGE));
                             if (tickets.length() > 0) {

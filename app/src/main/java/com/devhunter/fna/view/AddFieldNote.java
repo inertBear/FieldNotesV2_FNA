@@ -3,6 +3,7 @@ package com.devhunter.fna.view;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,13 +42,17 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+import static com.devhunter.fna.view.Login.PREFS_NAME;
+import static com.devhunter.fna.view.Login.PREF_CUSTOMER_KEY;
+
 /**
  * Created by DevHunter on 5/3/2018.
  */
 
 public class AddFieldNote extends Fragment {
 
-    private static final String ADD_NOTE_URL = "http://www.fieldnotesfn.com/FieldNotesAndroid_CustomWebService_PHP/FieldNotes_addNote_android_5_7_2018.php";
+    private static final String ADD_NOTE_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_addNote.php";
     private static final String TAG = "AddFieldNote";
     private static final String TAG_SUCCESS = "success";
     private static final String TAG_MESSAGE = "message";
@@ -238,6 +243,10 @@ public class AddFieldNote extends Fragment {
             String billingCode = mBillingCode.getSelectedItem().toString();
             String location = mLocation.getSelectedItem().toString();
 
+            //get customer key from preferences
+            SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+
             try {
                 //build FieldNote
                 fieldNote = new FieldNote.FieldNoteBuilder()
@@ -286,10 +295,13 @@ public class AddFieldNote extends Fragment {
                 }
                 params.add(new BasicNameValuePair("gps", mCurrentLocation));
 
+                params.add(new BasicNameValuePair("customerKey", customerKey));
+
                 try {
                     //send params and get JSONObject response
                     JSONObject json = mJsonParser.createHttpRequest(ADD_NOTE_URL, "POST", params);
-                    if (json.getInt(TAG_SUCCESS) == 1) {
+                    String status = json.getString("status");
+                    if (status.equals("success")) {
                         // return to default activity
                         Intent ii = new Intent(getActivity(), Welcome.class);
                         startActivity(ii);

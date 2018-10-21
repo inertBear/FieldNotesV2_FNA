@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -24,12 +25,13 @@ import java.util.List;
 
 public class Login extends AppCompatActivity {
     // static strings
-    private static final String LOGIN_URL = "http://www.fieldnotesfn.com/FieldNotesAndroid_CustomWebService_PHP/FieldNotes_login_android_5_2_2018.php";
-    private static final String TAG_SUCCESS = "success";
+    private static final String LOGIN_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_login.php";
+    private static final String TAG_STATUS = "status";
     private static final String TAG_MESSAGE = "message";
     public static final String PREFS_NAME = "fnPrefFile";
     private static final String PREF_USERNAME = "username";
     private static final String PREF_PASSWORD = "password";
+    public static final String PREF_CUSTOMER_KEY = "customerkey";
     public static String mUserName = "";
     // AsyncTask
     private ProgressDialog mProgressDialog;
@@ -72,20 +74,25 @@ public class Login extends AppCompatActivity {
                     case R.id.LoginButton:
                         new AttemptLogin().execute();
                         break;
-                    //case R.id.RegisterButton:
-                    //new AttemptRegister().execute();
                     default:
                         break;
                 }
             }
         });
+
+        //get customer key from preferences
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+        if(customerKey.isEmpty()){
+            Intent openRegisterActivity = new Intent(Login.this, RegisterProduct.class);
+            startActivity(openRegisterActivity);
+        }
     }
 
     /**
      * Asynchornous login with a progress bar running on the UI thread to show the user that
      * the login mInputStream 'working'
      */
-
     class AttemptLogin extends AsyncTask<String, String, String> {
         /**
          * Before starting background thread Show Progress Dialog
@@ -116,20 +123,26 @@ public class Login extends AppCompatActivity {
          */
         @Override
         protected String doInBackground(String... args) {
-            int success;
+            String status;
             // get login strings
             String username = mUserNameET.getText().toString();
             String password = mPasswordET.getText().toString();
+
+            //get customer key from preferences
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+
             try {
                 // convert to List of params
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
+                List<NameValuePair> params = new ArrayList<>();
                 params.add(new BasicNameValuePair("username", username));
                 params.add(new BasicNameValuePair("password", password));
+                params.add(new BasicNameValuePair("customerKey", customerKey));
                 // make HTTP connection
                 JSONObject json = mJsonParser.createHttpRequest(LOGIN_URL, "POST", params);
-                success = json.getInt(TAG_SUCCESS);
+                status = json.getString(TAG_STATUS);
                 // check return value from PHP
-                if (success == 1) {
+                if (status.equals("success")) {
                     // successful Login
                     Intent ii = new Intent(Login.this, Welcome.class);
                     startActivity(ii);
