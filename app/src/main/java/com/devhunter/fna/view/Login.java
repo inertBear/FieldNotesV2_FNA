@@ -32,7 +32,6 @@ public class Login extends AppCompatActivity {
     private static final String PREF_USERNAME = "username";
     private static final String PREF_PASSWORD = "password";
     public static final String PREF_CUSTOMER_KEY = "customerkey";
-    private static final String CUSTOMER_KEY = "1234567890";
     public static String mUserName = "";
     // AsyncTask
     private ProgressDialog mProgressDialog;
