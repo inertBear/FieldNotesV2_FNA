@@ -300,7 +300,8 @@ public class AddFieldNote extends Fragment {
                 try {
                     //send params and get JSONObject response
                     JSONObject json = mJsonParser.createHttpRequest(ADD_NOTE_URL, "POST", params);
-                    if (json.getInt(TAG_SUCCESS) == 1) {
+                    String status = json.getString("status");
+                    if (status.equals("success")) {
                         // return to default activity
                         Intent ii = new Intent(getActivity(), Welcome.class);
                         startActivity(ii);
