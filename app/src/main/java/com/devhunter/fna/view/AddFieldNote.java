@@ -43,22 +43,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.devhunter.fna.view.Login.PREFS_NAME;
-import static com.devhunter.fna.view.Login.PREF_CUSTOMER_KEY;
+import static com.devhunter.fna.constants.FNAConstants.BILLING_CODE_ARRAY;
+import static com.devhunter.fna.constants.FNAConstants.LOCATION_ARRAY;
+import static com.devhunter.fna.constants.FNAConstants.PREFS_NAME;
+import static com.devhunter.fna.constants.FNAConstants.PREF_CUSTOMER_KEY;
+import static com.devhunter.fna.constants.FNConstants.ADD_NOTE_URL;
+import static com.devhunter.fna.constants.FNConstants.BILLING_TAG;
+import static com.devhunter.fna.constants.FNConstants.DATE_END_TAG;
+import static com.devhunter.fna.constants.FNConstants.DATE_START_TAG;
+import static com.devhunter.fna.constants.FNConstants.DESCRIPTION_TAG;
+import static com.devhunter.fna.constants.FNConstants.GPS_TAG;
+import static com.devhunter.fna.constants.FNConstants.HTTP_REQUEST_METHOD_POST;
+import static com.devhunter.fna.constants.FNConstants.LOCATION_TAG;
+import static com.devhunter.fna.constants.FNConstants.MILEAGE_END_TAG;
+import static com.devhunter.fna.constants.FNConstants.MILEAGE_START_TAG;
+import static com.devhunter.fna.constants.FNConstants.PRODUCT_KEY_TAG;
+import static com.devhunter.fna.constants.FNConstants.PROJECT_NUMBER_TAG;
+import static com.devhunter.fna.constants.FNConstants.RESPONSE_MESSAGE_TAG;
+import static com.devhunter.fna.constants.FNConstants.RESPONSE_STATUS_SUCCESS;
+import static com.devhunter.fna.constants.FNConstants.RESPONSE_STATUS_TAG;
+import static com.devhunter.fna.constants.FNConstants.TIME_END_TAG;
+import static com.devhunter.fna.constants.FNConstants.TIME_START_TAG;
+import static com.devhunter.fna.constants.FNConstants.USERNAME_TAG;
+import static com.devhunter.fna.constants.FNConstants.WELLNAME_TAG;
 
 /**
  * Created by DevHunter on 5/3/2018.
  */
 
 public class AddFieldNote extends Fragment {
-
-    private static final String ADD_NOTE_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_addNote.php";
-    private static final String TAG = "AddFieldNote";
-    private static final String TAG_SUCCESS = "success";
-    private static final String TAG_MESSAGE = "message";
-    // there is no way to implement a "spinner hint" with using an Android resource array
-    private static final String[] locationArray = new String[]{"Field", "Office", "Shop", "N/A", "Location"};
-    private static final String[] billingCodeArray = new String[]{"Billable", "Not Billable", "Turn-key", "N/A", "Billing"};
 
     private ProgressDialog mProgressDialog;
     private JSONParser mJsonParser;
@@ -106,10 +119,10 @@ public class AddFieldNote extends Fragment {
         mFocusView = view.findViewById(R.id.focus_view);
         mFocusView.requestFocus();
 
-        mProjectName = (EditText) view.findViewById(R.id.projectName);
-        mWellName = (EditText) view.findViewById(R.id.wellName);
-        mDescription = (EditText) view.findViewById(R.id.description);
-        mDateStart = (EditText) view.findViewById(R.id.dateStart);
+        mProjectName = view.findViewById(R.id.projectName);
+        mWellName = view.findViewById(R.id.wellName);
+        mDescription = view.findViewById(R.id.description);
+        mDateStart = view.findViewById(R.id.dateStart);
         mDateStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -117,7 +130,7 @@ public class AddFieldNote extends Fragment {
                 dateFragment.show(getFragmentManager(), "DatePicker");
             }
         });
-        mTimeStart = (EditText) view.findViewById(R.id.timeStart);
+        mTimeStart = view.findViewById(R.id.timeStart);
         mTimeStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -125,7 +138,7 @@ public class AddFieldNote extends Fragment {
                 timeFragment.show(getFragmentManager(), "TimePicker");
             }
         });
-        mDateEnd = (EditText) view.findViewById(R.id.dateEnd);
+        mDateEnd = view.findViewById(R.id.dateEnd);
         mDateEnd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -133,7 +146,7 @@ public class AddFieldNote extends Fragment {
                 dateFragment.show(getFragmentManager(), "DatePicker");
             }
         });
-        mTimeEnd = (EditText) view.findViewById(R.id.timeEnd);
+        mTimeEnd = view.findViewById(R.id.timeEnd);
         mTimeEnd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -141,8 +154,8 @@ public class AddFieldNote extends Fragment {
                 timeFragment.show(getFragmentManager(), "TimePicker");
             }
         });
-        mLocation = (Spinner) view.findViewById(R.id.location);
-        final HintAdapter hintAdapter = new HintAdapter(getActivity(), R.layout.layout_spinner_item, locationArray);
+        mLocation = view.findViewById(R.id.location);
+        final HintAdapter hintAdapter = new HintAdapter(getActivity(), R.layout.layout_spinner_item, LOCATION_ARRAY);
         mLocation.setAdapter(hintAdapter);
         mLocation.setSelection(hintAdapter.getCount());
         mLocation.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -159,8 +172,8 @@ public class AddFieldNote extends Fragment {
             }
         });
 
-        mBillingCode = (Spinner) getView().findViewById(R.id.billingCode);
-        final HintAdapter hintAdapter2 = new HintAdapter(getActivity(), R.layout.layout_spinner_item, billingCodeArray);
+        mBillingCode = getView().findViewById(R.id.billingCode);
+        final HintAdapter hintAdapter2 = new HintAdapter(getActivity(), R.layout.layout_spinner_item, BILLING_CODE_ARRAY);
         mBillingCode.setAdapter(hintAdapter2);
         mBillingCode.setSelection(hintAdapter2.getCount());
         mBillingCode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -177,11 +190,11 @@ public class AddFieldNote extends Fragment {
             }
         });
 
-        mMileageStart = (EditText) getView().findViewById(R.id.mileageStart);
-        mMileageEnd = (EditText) getView().findViewById(R.id.mileageEnd);
-        mAddButton = (FloatingActionButton) getView().findViewById(R.id.addButton);
+        mMileageStart = getView().findViewById(R.id.mileageStart);
+        mMileageEnd = getView().findViewById(R.id.mileageEnd);
+        mAddButton = getView().findViewById(R.id.addButton);
 
-        mGpsCheckbox = (CheckBox) getView().findViewById(R.id.gpsCheckbox);
+        mGpsCheckbox = getView().findViewById(R.id.gpsCheckbox);
         mGpsCheckbox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -243,10 +256,6 @@ public class AddFieldNote extends Fragment {
             String billingCode = mBillingCode.getSelectedItem().toString();
             String location = mLocation.getSelectedItem().toString();
 
-            //get customer key from preferences
-            SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
-
             try {
                 //build FieldNote
                 fieldNote = new FieldNote.FieldNoteBuilder()
@@ -276,40 +285,44 @@ public class AddFieldNote extends Fragment {
 
             //TODO: convert the FieldNote object to JSON and sent that instead of this
             if (fieldNote != null) {
+
+                //get customer key from preferences
+                SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+
                 //load params/value pairs into List
                 List<NameValuePair> params = new ArrayList<>();
-                params.add(new BasicNameValuePair("userName", fieldNote.getCreator()));
-                params.add(new BasicNameValuePair("wellName", fieldNote.getWellName()));
-                params.add(new BasicNameValuePair("dateStart", fieldNote.getStartDate()));
-                params.add(new BasicNameValuePair("timeStart", fieldNote.getStartTime()));
-                params.add(new BasicNameValuePair("mileageStart", fieldNote.getMileageStart()));
-                params.add(new BasicNameValuePair("description", fieldNote.getDescription()));
-                params.add(new BasicNameValuePair("mileageEnd", fieldNote.getMileageEnd()));
-                params.add(new BasicNameValuePair("dateEnd", fieldNote.getEndDate()));
-                params.add(new BasicNameValuePair("timeEnd", fieldNote.getEndTime()));
-                params.add(new BasicNameValuePair("projectNumber", fieldNote.getProject()));
-                params.add(new BasicNameValuePair("billing", fieldNote.getBilling()));
-                params.add(new BasicNameValuePair("location", fieldNote.getLocation()));
+                params.add(new BasicNameValuePair(USERNAME_TAG, fieldNote.getCreator()));
+                params.add(new BasicNameValuePair(WELLNAME_TAG, fieldNote.getWellName()));
+                params.add(new BasicNameValuePair(DATE_START_TAG, fieldNote.getStartDate()));
+                params.add(new BasicNameValuePair(TIME_START_TAG, fieldNote.getStartTime()));
+                params.add(new BasicNameValuePair(MILEAGE_START_TAG, fieldNote.getMileageStart()));
+                params.add(new BasicNameValuePair(DESCRIPTION_TAG, fieldNote.getDescription()));
+                params.add(new BasicNameValuePair(MILEAGE_END_TAG, fieldNote.getMileageEnd()));
+                params.add(new BasicNameValuePair(DATE_END_TAG, fieldNote.getEndDate()));
+                params.add(new BasicNameValuePair(TIME_END_TAG, fieldNote.getEndTime()));
+                params.add(new BasicNameValuePair(PROJECT_NUMBER_TAG, fieldNote.getProject()));
+                params.add(new BasicNameValuePair(BILLING_TAG, fieldNote.getBilling()));
+                params.add(new BasicNameValuePair(LOCATION_TAG, fieldNote.getLocation()));
                 if (mGpsCheckbox.isChecked()) {
                     mCurrentLocation = SelfLocator.getCurrentLocation();
                 }
-                params.add(new BasicNameValuePair("gps", mCurrentLocation));
-
-                params.add(new BasicNameValuePair("customerKey", customerKey));
+                params.add(new BasicNameValuePair(GPS_TAG, mCurrentLocation));
+                params.add(new BasicNameValuePair(PRODUCT_KEY_TAG, customerKey));
 
                 try {
                     //send params and get JSONObject response
-                    JSONObject json = mJsonParser.createHttpRequest(ADD_NOTE_URL, "POST", params);
-                    String status = json.getString("status");
-                    if (status.equals("success")) {
+                    JSONObject json = mJsonParser.createHttpRequest(ADD_NOTE_URL, HTTP_REQUEST_METHOD_POST, params);
+                    String status = json.getString(RESPONSE_STATUS_TAG);
+                    if (status.equals(RESPONSE_STATUS_SUCCESS)) {
                         // return to default activity
                         Intent ii = new Intent(getActivity(), Welcome.class);
                         startActivity(ii);
                         getActivity().finish();
-                        return json.getString(TAG_MESSAGE);
+                        return json.getString(RESPONSE_MESSAGE_TAG);
                     } else {
                         //add failure
-                        return json.getString(TAG_MESSAGE);
+                        return json.getString(RESPONSE_MESSAGE_TAG);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

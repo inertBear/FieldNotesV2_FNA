@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -23,20 +22,25 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.devhunter.fna.constants.FNAConstants.PREFS_NAME;
+import static com.devhunter.fna.constants.FNAConstants.PREF_CUSTOMER_KEY;
+import static com.devhunter.fna.constants.FNAConstants.PREF_PASSWORD;
+import static com.devhunter.fna.constants.FNAConstants.PREF_REMEMBER_LOGIN;
+import static com.devhunter.fna.constants.FNAConstants.PREF_USERNAME;
+import static com.devhunter.fna.constants.FNConstants.HTTP_REQUEST_METHOD_POST;
+import static com.devhunter.fna.constants.FNConstants.LOGIN_URL;
+import static com.devhunter.fna.constants.FNConstants.PRODUCT_KEY_TAG;
+import static com.devhunter.fna.constants.FNConstants.RESPONSE_MESSAGE_TAG;
+import static com.devhunter.fna.constants.FNConstants.RESPONSE_STATUS_SUCCESS;
+import static com.devhunter.fna.constants.FNConstants.RESPONSE_STATUS_TAG;
+import static com.devhunter.fna.constants.FNConstants.USER_PASSWORD_TAG;
+import static com.devhunter.fna.constants.FNConstants.USER_USERNAME_TAG;
+
 public class Login extends AppCompatActivity {
-    // static strings
-    private static final String LOGIN_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_login.php";
-    private static final String TAG_STATUS = "status";
-    private static final String TAG_MESSAGE = "message";
-    public static final String PREFS_NAME = "fnPrefFile";
-    private static final String PREF_USERNAME = "username";
-    private static final String PREF_PASSWORD = "password";
-    public static final String PREF_CUSTOMER_KEY = "customerkey";
+
     public static String mUserName = "";
-    // AsyncTask
     private ProgressDialog mProgressDialog;
     private JSONParser mJsonParser = new JSONParser();
-    // Views
     private EditText mUserNameET;
     private EditText mPasswordET;
     private Button mButtonLogin;
@@ -45,17 +49,19 @@ public class Login extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_login);
+
         //customize actionbar
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.drawable.fn_icon);
         getSupportActionBar().setTitle("");
+
         // get views
-        mUserNameET = (EditText) findViewById(R.id.UsernameET);
-        mPasswordET = (EditText) findViewById(R.id.PasswordET);
+        mUserNameET = findViewById(R.id.UsernameET);
+        mPasswordET = findViewById(R.id.PasswordET);
 
         // check preferences and auto-fill login form
         SharedPreferences pref = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        boolean autolog = pref.getBoolean("remember_login", false);
+        boolean autolog = pref.getBoolean(PREF_REMEMBER_LOGIN, false);
         String username = pref.getString(PREF_USERNAME, null);
         String password = pref.getString(PREF_PASSWORD, null);
         if (autolog) {
@@ -66,7 +72,7 @@ public class Login extends AppCompatActivity {
         }
 
         // Login button OnClick
-        mButtonLogin = (Button) findViewById(R.id.LoginButton);
+        mButtonLogin = findViewById(R.id.LoginButton);
         mButtonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -83,7 +89,7 @@ public class Login extends AppCompatActivity {
         //get customer key from preferences
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
-        if(customerKey.isEmpty()){
+        if (customerKey.isEmpty()) {
             Intent openRegisterActivity = new Intent(Login.this, RegisterProduct.class);
             startActivity(openRegisterActivity);
         }
@@ -135,22 +141,22 @@ public class Login extends AppCompatActivity {
             try {
                 // convert to List of params
                 List<NameValuePair> params = new ArrayList<>();
-                params.add(new BasicNameValuePair("username", username));
-                params.add(new BasicNameValuePair("password", password));
-                params.add(new BasicNameValuePair("customerKey", customerKey));
+                params.add(new BasicNameValuePair(USER_USERNAME_TAG, username));
+                params.add(new BasicNameValuePair(USER_PASSWORD_TAG, password));
+                params.add(new BasicNameValuePair(PRODUCT_KEY_TAG, customerKey));
                 // make HTTP connection
-                JSONObject json = mJsonParser.createHttpRequest(LOGIN_URL, "POST", params);
-                status = json.getString(TAG_STATUS);
+                JSONObject json = mJsonParser.createHttpRequest(LOGIN_URL, HTTP_REQUEST_METHOD_POST, params);
+                status = json.getString(RESPONSE_STATUS_TAG);
                 // check return value from PHP
-                if (status.equals("success")) {
+                if (status.equals(RESPONSE_STATUS_SUCCESS)) {
                     // successful Login
                     Intent ii = new Intent(Login.this, Welcome.class);
                     startActivity(ii);
                     finish();
-                    return json.getString(TAG_MESSAGE);
+                    return json.getString(RESPONSE_MESSAGE_TAG);
                 } else {
                     // failed login - bad username/password
-                    return json.getString(TAG_MESSAGE);
+                    return json.getString(RESPONSE_MESSAGE_TAG);
                 }
             } catch (JSONException e) {
                 // JSON exception - should never be reached

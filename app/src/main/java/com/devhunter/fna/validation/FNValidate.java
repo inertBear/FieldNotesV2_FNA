@@ -12,19 +12,10 @@ import android.content.Context;
 
 public class FNValidate {
 
-    private static FNValidate sInstance;
-    Context mContext;
+    private Context mContext;
 
     private FNValidate(Context context) {
         mContext = context;
-    }
-
-    public static FNValidate getInstance(Context context) {
-        if(sInstance != null){
-            return sInstance;
-        } else {
-            return new FNValidate(context);
-        }
     }
 
     /**

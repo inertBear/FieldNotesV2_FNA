@@ -42,21 +42,35 @@ import java.util.HashMap;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.devhunter.fna.view.Login.PREFS_NAME;
-import static com.devhunter.fna.view.Login.PREF_CUSTOMER_KEY;
+import static com.devhunter.fna.constants.FNAConstants.BILLING_CODE_ARRAY;
+import static com.devhunter.fna.constants.FNAConstants.LOCATION_ARRAY;
+import static com.devhunter.fna.constants.FNAConstants.PREFS_NAME;
+import static com.devhunter.fna.constants.FNAConstants.PREF_CUSTOMER_KEY;
+import static com.devhunter.fna.constants.FNConstants.BILLING_TAG;
+import static com.devhunter.fna.constants.FNConstants.DATE_END_TAG;
+import static com.devhunter.fna.constants.FNConstants.DATE_START_TAG;
+import static com.devhunter.fna.constants.FNConstants.DESCRIPTION_TAG;
+import static com.devhunter.fna.constants.FNConstants.GPS_TAG;
+import static com.devhunter.fna.constants.FNConstants.HTTP_REQUEST_METHOD_POST;
+import static com.devhunter.fna.constants.FNConstants.LOCATION_TAG;
+import static com.devhunter.fna.constants.FNConstants.MILEAGE_END_TAG;
+import static com.devhunter.fna.constants.FNConstants.MILEAGE_START_TAG;
+import static com.devhunter.fna.constants.FNConstants.PRODUCT_KEY_TAG;
+import static com.devhunter.fna.constants.FNConstants.PROJECT_NUMBER_TAG;
+import static com.devhunter.fna.constants.FNConstants.RESPONSE_MESSAGE_TAG;
+import static com.devhunter.fna.constants.FNConstants.RESPONSE_STATUS_TAG;
+import static com.devhunter.fna.constants.FNConstants.TICKET_NUMBER_TAG;
+import static com.devhunter.fna.constants.FNConstants.TIME_END_TAG;
+import static com.devhunter.fna.constants.FNConstants.TIME_START_TAG;
+import static com.devhunter.fna.constants.FNConstants.UPDATE_NOTE_URL;
+import static com.devhunter.fna.constants.FNConstants.USERNAME_TAG;
+import static com.devhunter.fna.constants.FNConstants.WELLNAME_TAG;
 
 /**
  * Created by DevHunter on 5/8/2018.
  */
 
 public class UpdateFieldNote extends Fragment {
-
-    private static final String UPDATE_NOTE_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_updateNote.php";
-    private static final String TAG_STATUS = "status";
-    private static final String TAG_MESSAGE = "message";
-    // there is no way to implement a "spinner hint" with using an Android resource array
-    private final String[] locationArray = new String[]{"Field", "Office", "Shop", "N/A", "Location"};
-    private final String[] billingCodeArray = new String[]{"Billable", "Not Billable", "Turn-key", "N/A", "Billing"};
 
     private ProgressDialog mProgressDialog;
     private JSONParser mJsonParser;
@@ -104,12 +118,12 @@ public class UpdateFieldNote extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         // define views
-        mFocusView = getView().findViewById(R.id.edit_focus_view);
+        mFocusView = view.findViewById(R.id.edit_focus_view);
         mFocusView.requestFocus();
-        mProjectName = (EditText) getView().findViewById(R.id.projectName);
-        mWellName = (EditText) getView().findViewById(R.id.wellName);
-        mDescription = (EditText) getView().findViewById(R.id.description);
-        mDateStart = (EditText) getView().findViewById(R.id.dateStart);
+        mProjectName = view.findViewById(R.id.projectName);
+        mWellName = view.findViewById(R.id.wellName);
+        mDescription = view.findViewById(R.id.description);
+        mDateStart = view.findViewById(R.id.dateStart);
         mDateStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -117,7 +131,7 @@ public class UpdateFieldNote extends Fragment {
                 dateFragment.show(getFragmentManager(), "DatePicker");
             }
         });
-        mTimeStart = (EditText) getView().findViewById(R.id.timeStart);
+        mTimeStart = getView().findViewById(R.id.timeStart);
         mTimeStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -125,7 +139,7 @@ public class UpdateFieldNote extends Fragment {
                 timeFragment.show(getFragmentManager(), "TimePicker");
             }
         });
-        mDateEnd = (EditText) getView().findViewById(R.id.dateEnd);
+        mDateEnd = getView().findViewById(R.id.dateEnd);
         mDateEnd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -133,7 +147,7 @@ public class UpdateFieldNote extends Fragment {
                 dateFragment.show(getFragmentManager(), "DatePicker");
             }
         });
-        mTimeEnd = (EditText) getView().findViewById(R.id.timeEnd);
+        mTimeEnd = getView().findViewById(R.id.timeEnd);
         mTimeEnd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -141,11 +155,11 @@ public class UpdateFieldNote extends Fragment {
                 timeFragment.show(getFragmentManager(), "TimePicker");
             }
         });
-        mMileageStart = (EditText) getView().findViewById(R.id.mileageStart);
-        mMileageEnd = (EditText) getView().findViewById(R.id.mileageEnd);
+        mMileageStart = getView().findViewById(R.id.mileageStart);
+        mMileageEnd = getView().findViewById(R.id.mileageEnd);
 
-        mLocation = (Spinner) getView().findViewById(R.id.update_location);
-        final HintAdapter hintAdapter = new HintAdapter(getActivity(), R.layout.layout_spinner_item, locationArray);
+        mLocation = getView().findViewById(R.id.update_location);
+        final HintAdapter hintAdapter = new HintAdapter(getActivity(), R.layout.layout_spinner_item, LOCATION_ARRAY);
         mLocation.setAdapter(hintAdapter);
         mLocation.setSelection(hintAdapter.getCount());
         mLocation.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -162,8 +176,8 @@ public class UpdateFieldNote extends Fragment {
             }
         });
 
-        mBillingCode = (Spinner) getView().findViewById(R.id.update_billingCode);
-        final HintAdapter hintAdapter2 = new HintAdapter(getActivity(), R.layout.layout_spinner_item, billingCodeArray);
+        mBillingCode = getView().findViewById(R.id.update_billingCode);
+        final HintAdapter hintAdapter2 = new HintAdapter(getActivity(), R.layout.layout_spinner_item, BILLING_CODE_ARRAY);
         mBillingCode.setAdapter(hintAdapter2);
         mBillingCode.setSelection(hintAdapter2.getCount());
         mBillingCode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -180,11 +194,11 @@ public class UpdateFieldNote extends Fragment {
             }
         });
 
-        mGpsCheckBox = (CheckBox) getView().findViewById(R.id.gpsCheckbox);
+        mGpsCheckBox = getView().findViewById(R.id.gpsCheckbox);
         mGpsCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) {
+                if (isChecked) {
                     //if location services are not granted to FieldNotes
                     if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                             ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -195,7 +209,7 @@ public class UpdateFieldNote extends Fragment {
             }
         });
 
-        mUpdateButton = (FloatingActionButton) getView().findViewById(R.id.addButton);
+        mUpdateButton = getView().findViewById(R.id.addButton);
 
 
         //TODO: encapsulate this to a SpinnerHint Class
@@ -297,10 +311,6 @@ public class UpdateFieldNote extends Fragment {
             String billingCode = mBillingCode.getSelectedItem().toString();
             String location = mLocation.getSelectedItem().toString();
 
-            //get customer key from preferences
-            SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
-
             try {
                 //build FieldNote
                 fieldNote = new FieldNote.FieldNoteBuilder()
@@ -331,41 +341,45 @@ public class UpdateFieldNote extends Fragment {
 
             //TODO: convert the FieldNote object to JSON and sent that instead of this
             if (fieldNote != null) {
+
+                //get customer key from preferences
+                SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+
                 //load params/values into List
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair("userName", Login.getLoggedInUser()));
-                params.add(new BasicNameValuePair("wellName", FNValidate.validate(mWellName.getText().toString())));
-                params.add(new BasicNameValuePair("dateStart", mDateStart.getText().toString()));
-                params.add(new BasicNameValuePair("timeStart", mTimeStart.getText().toString()));
-                params.add(new BasicNameValuePair("mileageStart", mMileageStart.getText().toString()));
-                params.add(new BasicNameValuePair("description", FNValidate.validate(mDescription.getText().toString())));
-                params.add(new BasicNameValuePair("mileageEnd", mMileageEnd.getText().toString()));
-                params.add(new BasicNameValuePair("dateEnd", mDateEnd.getText().toString()));
-                params.add(new BasicNameValuePair("timeEnd", mTimeEnd.getText().toString()));
-                params.add(new BasicNameValuePair("projectNumber", FNValidate.validate(mProjectName.getText().toString())));
-                params.add(new BasicNameValuePair("billing", mBillingCode.getSelectedItem().toString()));
-                params.add(new BasicNameValuePair("location", mLocation.getSelectedItem().toString()));
+                List<NameValuePair> params = new ArrayList<>();
+                params.add(new BasicNameValuePair(USERNAME_TAG, Login.getLoggedInUser()));
+                params.add(new BasicNameValuePair(WELLNAME_TAG, FNValidate.validate(mWellName.getText().toString())));
+                params.add(new BasicNameValuePair(DATE_START_TAG, mDateStart.getText().toString()));
+                params.add(new BasicNameValuePair(TIME_START_TAG, mTimeStart.getText().toString()));
+                params.add(new BasicNameValuePair(MILEAGE_START_TAG, mMileageStart.getText().toString()));
+                params.add(new BasicNameValuePair(DESCRIPTION_TAG, FNValidate.validate(mDescription.getText().toString())));
+                params.add(new BasicNameValuePair(MILEAGE_END_TAG, mMileageEnd.getText().toString()));
+                params.add(new BasicNameValuePair(DATE_END_TAG, mDateEnd.getText().toString()));
+                params.add(new BasicNameValuePair(TIME_END_TAG, mTimeEnd.getText().toString()));
+                params.add(new BasicNameValuePair(PROJECT_NUMBER_TAG, FNValidate.validate(mProjectName.getText().toString())));
+                params.add(new BasicNameValuePair(BILLING_TAG, mBillingCode.getSelectedItem().toString()));
+                params.add(new BasicNameValuePair(LOCATION_TAG, mLocation.getSelectedItem().toString()));
                 if (mGpsCheckBox.isChecked()) {
                     mCurrentLocation = SelfLocator.getCurrentLocation();
                 }
-                params.add(new BasicNameValuePair("gps", mCurrentLocation));
-                params.add(new BasicNameValuePair("ticketNumber", mOldData.get("ticket")));
-
-                params.add(new BasicNameValuePair("customerKey", customerKey));
+                params.add(new BasicNameValuePair(GPS_TAG, mCurrentLocation));
+                params.add(new BasicNameValuePair(TICKET_NUMBER_TAG, mOldData.get("ticket")));
+                params.add(new BasicNameValuePair(PRODUCT_KEY_TAG, customerKey));
 
                 try {
                     //send params and get JSONObject response
-                    JSONObject json = mJsonParser.createHttpRequest(UPDATE_NOTE_URL, "POST", params);
-                    status = json.getString(TAG_STATUS);
+                    JSONObject json = mJsonParser.createHttpRequest(UPDATE_NOTE_URL, HTTP_REQUEST_METHOD_POST, params);
+                    status = json.getString(RESPONSE_STATUS_TAG);
                     if (status.equals("success")) {
                         // return to default activity
                         Intent ii = new Intent(getActivity(), Welcome.class);
                         startActivity(ii);
                         getActivity().finish();
-                        return json.getString(TAG_MESSAGE);
+                        return json.getString(RESPONSE_MESSAGE_TAG);
                     } else {
                         // not successful
-                        return json.getString(TAG_MESSAGE);
+                        return json.getString(RESPONSE_MESSAGE_TAG);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

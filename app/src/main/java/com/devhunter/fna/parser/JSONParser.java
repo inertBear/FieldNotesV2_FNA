@@ -21,10 +21,13 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import static com.devhunter.fna.constants.FNConstants.HTTP_REQUEST_METHOD_GET;
+import static com.devhunter.fna.constants.FNConstants.HTTP_REQUEST_METHOD_POST;
+
 /**
  * Creates an HTTP request and parses the JSON values coming back from the PHP Server Code. Returns
  * a JSON object to the Fragments to be read
- *
+ * <p>
  * Created on 5/2/2018.
  */
 
@@ -37,15 +40,15 @@ public class JSONParser {
     public JSONParser() {
     }
 
-    public JSONObject createHttpRequest(String url, String method,
-                                        List<NameValuePair> params) {
+    public JSONObject createHttpRequest(String url, String method, List<NameValuePair> params) {
+
         // Make new HTTP request
         mInputStream = null;
         mJsonObj = null;
         mJsonString = "";
         try {
             // checking request method
-            if (method.equals("POST")) {
+            if (method.equals(HTTP_REQUEST_METHOD_POST)) {
                 DefaultHttpClient httpClient = new DefaultHttpClient();
                 HttpPost httpPost = new HttpPost(url);
                 httpPost.setEntity(new UrlEncodedFormEntity(params));
@@ -53,7 +56,7 @@ public class JSONParser {
                 HttpResponse httpResponse = httpClient.execute(httpPost);
                 HttpEntity httpEntity = httpResponse.getEntity();
                 mInputStream = httpEntity.getContent();
-            } else if (method.equals("GET")) {
+            } else if (method.equals(HTTP_REQUEST_METHOD_GET)) {
                 DefaultHttpClient httpClient = new DefaultHttpClient();
                 String paramString = URLEncodedUtils.format(params, "utf-8");
                 url += "?" + paramString;

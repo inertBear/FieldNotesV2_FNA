@@ -21,7 +21,6 @@ import android.widget.Toast;
 
 import com.devhunter.fna.R;
 import com.devhunter.fna.parser.JSONParser;
-import com.devhunter.fna.validation.FNValidate;
 import com.devhunter.fna.view.datetime.SelectDateFragment;
 
 import org.apache.http.NameValuePair;
@@ -35,22 +34,37 @@ import java.util.HashMap;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.devhunter.fna.view.Login.PREFS_NAME;
-import static com.devhunter.fna.view.Login.PREF_CUSTOMER_KEY;
+import static com.devhunter.fna.constants.FNAConstants.PREFS_NAME;
+import static com.devhunter.fna.constants.FNAConstants.PREF_CUSTOMER_KEY;
+import static com.devhunter.fna.constants.FNConstants.BILLING_TAG;
+import static com.devhunter.fna.constants.FNConstants.DATE_END_TAG;
+import static com.devhunter.fna.constants.FNConstants.DATE_START_TAG;
+import static com.devhunter.fna.constants.FNConstants.DESCRIPTION_TAG;
+import static com.devhunter.fna.constants.FNConstants.GPS_TAG;
+import static com.devhunter.fna.constants.FNConstants.HTTP_REQUEST_METHOD_POST;
+import static com.devhunter.fna.constants.FNConstants.LOCATION_TAG;
+import static com.devhunter.fna.constants.FNConstants.MILEAGE_END_TAG;
+import static com.devhunter.fna.constants.FNConstants.MILEAGE_START_TAG;
+import static com.devhunter.fna.constants.FNConstants.PRODUCT_KEY_TAG;
+import static com.devhunter.fna.constants.FNConstants.PROJECT_NUMBER_TAG;
+import static com.devhunter.fna.constants.FNConstants.RESPONSE_MESSAGE_TAG;
+import static com.devhunter.fna.constants.FNConstants.RESPONSE_STATUS_SUCCESS;
+import static com.devhunter.fna.constants.FNConstants.RESPONSE_STATUS_TAG;
+import static com.devhunter.fna.constants.FNConstants.SEARCH_NOTES_URL;
+import static com.devhunter.fna.constants.FNConstants.TICKET_NUMBER_TAG;
+import static com.devhunter.fna.constants.FNConstants.TIME_END_TAG;
+import static com.devhunter.fna.constants.FNConstants.TIME_START_TAG;
+import static com.devhunter.fna.constants.FNConstants.USERNAME_TAG;
+import static com.devhunter.fna.constants.FNConstants.WELLNAME_TAG;
 
 /**
  * Created on 5/3/2018.
  */
 
 public class SearchFieldNote extends Fragment {
-    // static Strings
-    private static final String SEARCH_NOTE_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_searchNote.php";
-    private static final String TAG_SUCCESS = "status";
-    private static final String TAG_MESSAGE = "message";
-    // JSON parser
+
     private ProgressDialog mProgressDialog;
     private JSONParser mJsonParser;
-    // Views
     private TextView mDateStart;
     private TextView mDateEnd;
     private ListView mListView;
@@ -76,7 +90,7 @@ public class SearchFieldNote extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_search_tab_view, container, false);
-        mListView = (ListView) rootView.findViewById(android.R.id.list);
+        mListView = rootView.findViewById(android.R.id.list);
         return rootView;
     }
 
@@ -84,7 +98,7 @@ public class SearchFieldNote extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // detail views
-        mDateStart = (TextView) view.findViewById((R.id.SearchDateStart));
+        mDateStart = view.findViewById((R.id.SearchDateStart));
         mDateStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,7 +106,7 @@ public class SearchFieldNote extends Fragment {
                 newFragment.show(getFragmentManager(), "DatePicker");
             }
         });
-        mDateEnd = (TextView) view.findViewById(R.id.SearchDateEnd);
+        mDateEnd = view.findViewById(R.id.SearchDateEnd);
         mDateEnd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,7 +115,7 @@ public class SearchFieldNote extends Fragment {
             }
         });
 
-        mSearchButton = (Button) view.findViewById(R.id.searchButton);
+        mSearchButton = view.findViewById(R.id.searchButton);
         mSearchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -134,82 +148,68 @@ public class SearchFieldNote extends Fragment {
         @Override
         protected String doInBackground(String... strings) {
             String searchResultMessage = "";
-            List<NameValuePair> params = null;
 
             //get customer key from preferences
-            SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
             String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
 
+            List<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair(USERNAME_TAG, Login.getLoggedInUser()));
+            params.add(new BasicNameValuePair(DATE_START_TAG, mDateStart.getText().toString()));
+            params.add(new BasicNameValuePair(DATE_END_TAG, mDateEnd.getText().toString()));
+            params.add(new BasicNameValuePair(PRODUCT_KEY_TAG, customerKey));
+
             try {
-                //create and add search params
-                params = new ArrayList<>();
-                params.add(new BasicNameValuePair("userName", Login.getLoggedInUser()));
-                params.add(new BasicNameValuePair("dateStart", FNValidate.validateDateTime(mDateStart.getText().toString())));
-                params.add(new BasicNameValuePair("dateEnd", FNValidate.validateDateTime(mDateEnd.getText().toString())));
-                params.add(new BasicNameValuePair("customerKey", customerKey));
-            } catch (final Exception e) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getActivity(), e.getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-            }
-
-            if(params != null) {
-                if (params.size() == 4) {
-                    try {
-                        //array of search values
-                        JSONObject json = mJsonParser.createHttpRequest(SEARCH_NOTE_URL, "POST", params);
-                        String status = json.getString(TAG_SUCCESS);
-                        if (status.equals("success")) {
-                            //get Json object that is inside of the 'message'
-                            JSONArray tickets = new JSONArray(json.getString(TAG_MESSAGE));
-                            if (tickets.length() > 0) {
-                                mAllSearchResults = new ArrayList<>();
-                                //assign the strings to values
-                                for (int i = 0; i < tickets.length(); i++) {
-                                    //create new HashMap on each loop, so the same keys can be re-used
-                                    HashMap<String, String> singleResult = new HashMap<>();
-                                    //get result
-                                    JSONObject result = tickets.getJSONObject(i);
-                                    //put result into HashMap
-                                    singleResult.put("ticket", result.getString("ticketNumber"));
-                                    singleResult.put("user", result.getString("userName"));
-                                    singleResult.put("project", result.getString("projectNumber"));
-                                    singleResult.put("well", result.getString("wellName"));
-                                    singleResult.put("description", result.getString("description"));
-                                    singleResult.put("bill", result.getString("billing"));
-                                    singleResult.put("sDate", result.getString("dateStart"));
-                                    singleResult.put("eDate", result.getString("dateEnd"));
-                                    singleResult.put("sTime", result.getString("timeStart"));
-                                    singleResult.put("eTime", result.getString("timeEnd"));
-                                    singleResult.put("location", result.getString("location"));
-                                    singleResult.put("sMile", result.getString("mileageStart"));
-                                    singleResult.put("eMile", result.getString("mileageEnd"));
-                                    singleResult.put("gps", result.getString("gps"));
-                                    //put HashMap into ArrayList
-                                    mAllSearchResults.add(singleResult);
-                                    // mark success
-                                    searchResultMessage = "Search Complete";
-                                }
-                            } else {
-                                // mark no results
-                                searchResultMessage = "No Results Found";
-                            }
-                        } else {
-                            // mark no results
-                            searchResultMessage = "No Results Found";
+                //array of search values
+                JSONObject json = mJsonParser.createHttpRequest(SEARCH_NOTES_URL, HTTP_REQUEST_METHOD_POST, params);
+                String status = json.getString(RESPONSE_STATUS_TAG);
+                if (status.equals(RESPONSE_STATUS_SUCCESS)) {
+                    //get Json object that is inside of the 'message'
+                    JSONArray tickets = new JSONArray(json.getString(RESPONSE_MESSAGE_TAG));
+                    if (tickets.length() > 0) {
+                        mAllSearchResults = new ArrayList<>();
+                        //assign the strings to values
+                        for (int i = 0; i < tickets.length(); i++) {
+                            //create new HashMap on each loop, so the same keys can be re-used
+                            HashMap<String, String> singleResult = new HashMap<>();
+                            //get result
+                            JSONObject result = tickets.getJSONObject(i);
+                            //put result into HashMap
+                            singleResult.put("ticket", result.getString(TICKET_NUMBER_TAG));
+                            singleResult.put("user", result.getString(USERNAME_TAG));
+                            singleResult.put("project", result.getString(PROJECT_NUMBER_TAG));
+                            singleResult.put("well", result.getString(WELLNAME_TAG));
+                            singleResult.put("description", result.getString(DESCRIPTION_TAG));
+                            singleResult.put("bill", result.getString(BILLING_TAG));
+                            singleResult.put("sDate", result.getString(DATE_START_TAG));
+                            singleResult.put("eDate", result.getString(DATE_END_TAG));
+                            singleResult.put("sTime", result.getString(TIME_START_TAG));
+                            singleResult.put("eTime", result.getString(TIME_END_TAG));
+                            singleResult.put("location", result.getString(LOCATION_TAG));
+                            singleResult.put("sMile", result.getString(MILEAGE_START_TAG));
+                            singleResult.put("eMile", result.getString(MILEAGE_END_TAG));
+                            singleResult.put("gps", result.getString(GPS_TAG));
+                            //put HashMap into ArrayList
+                            mAllSearchResults.add(singleResult);
+                            // mark success
+                            searchResultMessage = "Search Complete";
                         }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        //shouldnt reach this, something's wrong wth the php
-                        Log.e("JSON Exeption", "getting JSON array from josn object");
+                    } else {
+                        // mark no results
+                        searchResultMessage = "No Results Found";
                     }
+                } else {
+                    // mark no results
+                    searchResultMessage = "No Results Found";
                 }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                //shouldnt reach this, something's wrong wth the php
+                Log.e("JSON Exeption", "getting JSON array from josn object");
             }
+
+
+            // sends message to onPostExecute
             return searchResultMessage;
         }
 
@@ -224,6 +224,8 @@ public class SearchFieldNote extends Fragment {
             }
             // manually layout search result into List adapter
             if (message.equals("Search Complete")) {
+
+                //TODO: create custom ListAdapter
                 //clear the listview
                 mListView.setAdapter(null);
                 final ListAdapter searchAdapter = new SimpleAdapter(getActivity(), mAllSearchResults,

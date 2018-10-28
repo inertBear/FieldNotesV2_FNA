@@ -34,11 +34,9 @@ import java.lang.ref.WeakReference;
 
 public class SelfLocator extends AsyncTask<String, String, String> {
     private static String TAG = "SelfLocator";
-
+    private static String mCurrentLocation = "0,0";
     private final WeakReference<Context> mWeakContext;
     private ProgressDialog mProgressDialog;
-    private String LOG_TAG = "SelfLocator";
-    private static String mCurrentLocation = "0,0";
     private double latitude = 0.0;
     private double longitude = 0.0;
 
@@ -68,25 +66,25 @@ public class SelfLocator extends AsyncTask<String, String, String> {
         LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                Log.v(LOG_TAG, "GPS location updated: " + location.getLatitude() + ", " + location.getLongitude());
+                Log.v(TAG, "GPS location updated: " + location.getLatitude() + ", " + location.getLongitude());
             }
 
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
-                Log.v(LOG_TAG, "GPS status changed: " + status);
+                Log.v(TAG, "GPS status changed: " + status);
                 switch (status) {
                     case LocationProvider.OUT_OF_SERVICE:
-                        Log.v(LOG_TAG, "Status Changed: Out of Service");
+                        Log.v(TAG, "Status Changed: Out of Service");
                         Toast.makeText(mWeakContext.get(), "Status Changed: Out of Service",
                                 Toast.LENGTH_SHORT).show();
                         break;
                     case LocationProvider.TEMPORARILY_UNAVAILABLE:
-                        Log.v(LOG_TAG, "Status Changed: Temporarily Unavailable");
+                        Log.v(TAG, "Status Changed: Temporarily Unavailable");
                         Toast.makeText(mWeakContext.get(), "Status Changed: Temporarily Unavailable",
                                 Toast.LENGTH_SHORT).show();
                         break;
                     case LocationProvider.AVAILABLE:
-                        Log.v(LOG_TAG, "Status Changed: Available");
+                        Log.v(TAG, "Status Changed: Available");
                         Toast.makeText(mWeakContext.get(), "Status Changed: Available",
                                 Toast.LENGTH_SHORT).show();
                         break;
@@ -95,14 +93,14 @@ public class SelfLocator extends AsyncTask<String, String, String> {
 
             @Override
             public void onProviderEnabled(String provider) {
-                Log.v(LOG_TAG, "GPS provider enabled: " + provider);
+                Log.v(TAG, "GPS provider enabled: " + provider);
                 Toast.makeText(mWeakContext.get(), "GPS provider has been enabled",
                         Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onProviderDisabled(String provider) {
-                Log.v(LOG_TAG, "GPS provider disabled: " + provider);
+                Log.v(TAG, "GPS provider disabled: " + provider);
                 Toast.makeText(mWeakContext.get(), "GPS provider has been disabled",
                         Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);

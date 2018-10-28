@@ -10,13 +10,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 
 import com.devhunter.fna.R;
 import com.devhunter.fna.preferences.PreferenceFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.devhunter.fna.constants.FNAConstants.ADD_NOTE_FRAGMENT_TITLE;
+import static com.devhunter.fna.constants.FNAConstants.SEARCH_NOTE_FRAGMENT_TITLE;
 
 /**
  * Created on 5/2/2018.
@@ -29,13 +31,13 @@ public class Welcome extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_welcome);
         //setup view pager and tab layout
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewPager);
+        ViewPager viewPager = findViewById(R.id.viewPager);
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new AddFieldNote(), "Add Note");
-        adapter.addFragment(new SearchFieldNote(), "Search Note");
+        adapter.addFragment(new AddFieldNote(), ADD_NOTE_FRAGMENT_TITLE);
+        adapter.addFragment(new SearchFieldNote(), SEARCH_NOTE_FRAGMENT_TITLE);
         viewPager.setAdapter(adapter);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
     }
 
