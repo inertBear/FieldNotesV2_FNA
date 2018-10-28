@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.devhunter.fna">
+    package="com.fieldnotes.fna">
 
     <application
         android:allowBackup="false"
@@ -10,7 +10,7 @@
         android:theme="@style/AppTheme">
         <!-- android:roundIcon="@mipmap/ic_launcher_round" -->
 
-        <activity android:name=".view.RegisterProduct"
+        <activity android:name="com.fieldnotes.fna.view.RegisterProduct"
             android:configChanges="orientation"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -18,7 +18,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".view.Login"
+        <activity android:name="com.fieldnotes.fna.view.Login"
             android:configChanges="orientation"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -27,7 +27,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".view.Welcome"
+        <activity android:name="com.fieldnotes.fna.view.Welcome"
             android:configChanges="orientation"
             android:screenOrientation="portrait">
             <intent-filter>

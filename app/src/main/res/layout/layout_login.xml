@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_blue_to_white"
-    tools:context="com.devhunter.fna.view.Login">
+    tools:context="com.fieldnotes.fna.view.Login">
 
     <ImageView
         android:id="@+id/AppLabel"

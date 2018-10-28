@@ -11,7 +11,7 @@
             android:orientation="vertical"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            tools:context="com.devhunter.fna.view.AddFieldNote">
+            tools:context="com.fieldnotes.fna.view.AddFieldNote">
 
             <TextView
                 android:id="@+id/resultTicket"

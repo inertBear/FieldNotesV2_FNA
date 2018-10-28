@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
 
             android:orientation="vertical"
-            tools:context="com.devhunter.fna.view.AddFieldNote">
+            tools:context="com.fieldnotes.fna.view.AddFieldNote">
 
             <!--dummyView-->
             <View
