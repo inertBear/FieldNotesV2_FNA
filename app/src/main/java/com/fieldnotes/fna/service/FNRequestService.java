@@ -1,6 +1,6 @@
 package com.fieldnotes.fna.service;
 
-import com.fieldnotes.fna.model.FNReponseType;
+import com.fieldnotes.fna.model.FNResponseType;
 import com.fieldnotes.fna.model.FNRequest;
 import com.fieldnotes.fna.model.FNResponse;
 import com.fieldnotes.fna.parser.JSONParser;
@@ -100,19 +100,19 @@ public class FNRequestService {
                 return responseBuilder.build();
             default:
                 return FNResponse.newBuilder()
-                        .setStatustype(FNReponseType.FAILURE)
+                        .setStatustype(FNResponseType.FAILURE)
                         .setMessage("Could not set Request Type")
                         .build();
         }
     }
 
-    private static FNReponseType convertResponseType(String status) {
+    private static FNResponseType convertResponseType(String status) {
         switch (status) {
             case "success":
-                return FNReponseType.SUCCESS;
+                return FNResponseType.SUCCESS;
             case "failure":
             default:
-                return FNReponseType.FAILURE;
+                return FNResponseType.FAILURE;
         }
     }
 }

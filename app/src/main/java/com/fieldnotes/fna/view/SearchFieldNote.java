@@ -19,7 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fieldnotes.fna.R;
-import com.fieldnotes.fna.model.FNReponseType;
+import com.fieldnotes.fna.model.FNResponseType;
 import com.fieldnotes.fna.model.FNRequest;
 import com.fieldnotes.fna.model.FNRequestType;
 import com.fieldnotes.fna.model.FNResponse;
@@ -149,7 +149,7 @@ public class SearchFieldNote extends Fragment {
                 // use request service to send request to FNP
                 FNResponse response = FNRequestService.sendRequest(request);
 
-                if (response.getResponseType().equals(FNReponseType.SUCCESS)) {
+                if (response.getResponseType().equals(FNResponseType.SUCCESS)) {
                     mAllSearchResults = response.getResultList();
                 }
 
