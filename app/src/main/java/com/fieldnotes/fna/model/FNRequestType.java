@@ -1,4 +1,4 @@
-package com.devhunter.fna.model;
+package com.fieldnotes.fna.model;
 
 /**
  * Enums for request type

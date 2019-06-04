@@ -1,4 +1,4 @@
-package com.devhunter.fna.view;
+package com.fieldnotes.fna.view;
 
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
@@ -18,14 +18,14 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.devhunter.fna.R;
-import com.devhunter.fna.model.FNReponseType;
-import com.devhunter.fna.model.FNRequest;
-import com.devhunter.fna.model.FNRequestType;
-import com.devhunter.fna.model.FNResponse;
-import com.devhunter.fna.service.FNRequestService;
-import com.devhunter.fna.validation.FNValidate;
-import com.devhunter.fna.view.datetime.SelectDateFragment;
+import com.fieldnotes.fna.R;
+import com.fieldnotes.fna.model.FNReponseType;
+import com.fieldnotes.fna.model.FNRequest;
+import com.fieldnotes.fna.model.FNRequestType;
+import com.fieldnotes.fna.model.FNResponse;
+import com.fieldnotes.fna.service.FNRequestService;
+import com.fieldnotes.fna.validation.FNValidate;
+import com.fieldnotes.fna.view.datetime.SelectDateFragment;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -36,8 +36,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.devhunter.fna.view.Login.PREFS_NAME;
-import static com.devhunter.fna.view.Login.PREF_CUSTOMER_KEY;
+import static com.fieldnotes.fna.view.Login.PREFS_NAME;
+import static com.fieldnotes.fna.view.Login.PREF_CUSTOMER_KEY;
 
 /**
  * Created on 5/3/2018.

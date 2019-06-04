@@ -1,4 +1,4 @@
-package com.devhunter.fna.view;
+package com.fieldnotes.fna.view;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -13,8 +13,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.devhunter.fna.R;
-import com.devhunter.fna.parser.JSONParser;
+import com.fieldnotes.fna.R;
+import com.fieldnotes.fna.parser.JSONParser;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;

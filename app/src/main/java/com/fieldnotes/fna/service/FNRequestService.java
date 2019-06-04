@@ -1,9 +1,9 @@
-package com.devhunter.fna.service;
+package com.fieldnotes.fna.service;
 
-import com.devhunter.fna.model.FNReponseType;
-import com.devhunter.fna.model.FNRequest;
-import com.devhunter.fna.model.FNResponse;
-import com.devhunter.fna.parser.JSONParser;
+import com.fieldnotes.fna.model.FNReponseType;
+import com.fieldnotes.fna.model.FNRequest;
+import com.fieldnotes.fna.model.FNResponse;
+import com.fieldnotes.fna.parser.JSONParser;
 
 import org.json.JSONArray;
 import org.json.JSONException;

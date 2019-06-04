@@ -1,4 +1,4 @@
-package com.devhunter.fna.view;
+package com.fieldnotes.fna.view;
 
 import android.Manifest;
 import android.app.ProgressDialog;
@@ -24,19 +24,19 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.devhunter.fna.R;
-import com.devhunter.fna.gps.SelfLocator;
-import com.devhunter.fna.model.FNReponseType;
-import com.devhunter.fna.model.FNRequest;
-import com.devhunter.fna.model.FNRequestType;
-import com.devhunter.fna.model.FNResponse;
-import com.devhunter.fna.model.FieldNote;
-import com.devhunter.fna.parser.JSONParser;
-import com.devhunter.fna.service.FNRequestService;
-import com.devhunter.fna.validation.FNValidate;
-import com.devhunter.fna.view.adapters.HintAdapter;
-import com.devhunter.fna.view.datetime.SelectDateFragment;
-import com.devhunter.fna.view.datetime.SelectTimeFragment;
+import com.fieldnotes.fna.R;
+import com.fieldnotes.fna.gps.SelfLocator;
+import com.fieldnotes.fna.model.FNReponseType;
+import com.fieldnotes.fna.model.FNRequest;
+import com.fieldnotes.fna.model.FNRequestType;
+import com.fieldnotes.fna.model.FNResponse;
+import com.fieldnotes.fna.model.FieldNote;
+import com.fieldnotes.fna.parser.JSONParser;
+import com.fieldnotes.fna.service.FNRequestService;
+import com.fieldnotes.fna.validation.FNValidate;
+import com.fieldnotes.fna.view.adapters.HintAdapter;
+import com.fieldnotes.fna.view.datetime.SelectDateFragment;
+import com.fieldnotes.fna.view.datetime.SelectTimeFragment;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -46,8 +46,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.devhunter.fna.view.Login.PREFS_NAME;
-import static com.devhunter.fna.view.Login.PREF_CUSTOMER_KEY;
+import static com.fieldnotes.fna.view.Login.PREFS_NAME;
+import static com.fieldnotes.fna.view.Login.PREF_CUSTOMER_KEY;
 
 /**
  * Created by DevHunter on 5/3/2018.
@@ -55,8 +55,8 @@ import static com.devhunter.fna.view.Login.PREF_CUSTOMER_KEY;
 
 public class AddFieldNote extends Fragment {
     // there is no way to implement a "spinner hint" with using an Android resource array
-    private static final String[] locationArray = new String[]{"Field", "Office", "Shop", "N/A", "Location"};
-    private static final String[] billingCodeArray = new String[]{"Billable", "Not Billable", "Turn-key", "N/A", "Billing"};
+    private static final String[] LOCATION_ARRAY = new String[]{"Field", "Office", "Shop", "N/A", "Location"};
+    private static final String[] BILLING_CODE_ARRAY = new String[]{"Billable", "Not Billable", "Turn-key", "N/A", "Billing"};
     // AsyncTask
     private ProgressDialog mProgressDialog;
     // Views

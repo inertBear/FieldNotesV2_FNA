@@ -1,4 +1,4 @@
-package com.devhunter.fna.view;
+package com.fieldnotes.fna.view;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -11,13 +11,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.devhunter.fna.R;
-import com.devhunter.fna.model.FNReponseType;
-import com.devhunter.fna.model.FNRequest;
-import com.devhunter.fna.model.FNRequestType;
-import com.devhunter.fna.model.FNResponse;
-import com.devhunter.fna.parser.JSONParser;
-import com.devhunter.fna.service.FNRequestService;
+import com.fieldnotes.fna.R;
+import com.fieldnotes.fna.model.FNReponseType;
+import com.fieldnotes.fna.model.FNRequest;
+import com.fieldnotes.fna.model.FNRequestType;
+import com.fieldnotes.fna.model.FNResponse;
+import com.fieldnotes.fna.service.FNRequestService;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
