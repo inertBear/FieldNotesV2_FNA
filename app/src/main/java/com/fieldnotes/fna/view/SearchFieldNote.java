@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,61 +19,39 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fieldnotes.fna.R;
-import com.fieldnotes.fna.parser.JSONParser;
+import com.fieldnotes.fna.model.FNReponseType;
+import com.fieldnotes.fna.model.FNRequest;
+import com.fieldnotes.fna.model.FNRequestType;
+import com.fieldnotes.fna.model.FNResponse;
+import com.fieldnotes.fna.service.FNRequestService;
+import com.fieldnotes.fna.validation.FNValidate;
 import com.fieldnotes.fna.view.datetime.SelectDateFragment;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.fieldnotes.fna.constants.FNAConstants.PREFS_NAME;
-import static com.fieldnotes.fna.constants.FNAConstants.PREF_CUSTOMER_KEY;
-import static com.fieldnotes.fna.constants.FNConstants.BILLING_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.DATE_END_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.DATE_START_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.DESCRIPTION_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.GPS_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.HTTP_REQUEST_METHOD_POST;
-import static com.fieldnotes.fna.constants.FNConstants.LOCATION_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.MILEAGE_END_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.MILEAGE_START_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.PRODUCT_KEY_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.PROJECT_NUMBER_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_MESSAGE_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_STATUS_SUCCESS;
-import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_STATUS_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.SEARCH_NOTES_URL;
-import static com.fieldnotes.fna.constants.FNConstants.TICKET_NUMBER_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.TIME_END_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.TIME_START_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.USERNAME_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.WELLNAME_TAG;
+import static com.fieldnotes.fna.view.Login.PREFS_NAME;
+import static com.fieldnotes.fna.view.Login.PREF_CUSTOMER_KEY;
 
 /**
  * Created on 5/3/2018.
  */
 
 public class SearchFieldNote extends Fragment {
-
     private ProgressDialog mProgressDialog;
-    private JSONParser mJsonParser;
+    // Views
     private TextView mDateStart;
     private TextView mDateEnd;
     private ListView mListView;
     private Button mSearchButton;
 
     private ArrayList<HashMap<String, String>> mAllSearchResults;
-
-    public SearchFieldNote() {
-        mJsonParser = new JSONParser();
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -147,76 +124,49 @@ public class SearchFieldNote extends Fragment {
 
         @Override
         protected String doInBackground(String... strings) {
-            String searchResultMessage = "";
-
             //get customer key from preferences
-            SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
-
-            List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair(USERNAME_TAG, Login.getLoggedInUser()));
-            params.add(new BasicNameValuePair(DATE_START_TAG, mDateStart.getText().toString()));
-            params.add(new BasicNameValuePair(DATE_END_TAG, mDateEnd.getText().toString()));
-            params.add(new BasicNameValuePair(PRODUCT_KEY_TAG, customerKey));
+            String loggedInUser = Login.getLoggedInUser();
+            SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            String productKey = prefs.getString(PREF_CUSTOMER_KEY, "");
 
             try {
-                //array of search values
-                JSONObject json = mJsonParser.createHttpRequest(SEARCH_NOTES_URL, HTTP_REQUEST_METHOD_POST, params);
-                String status = json.getString(RESPONSE_STATUS_TAG);
-                if (status.equals(RESPONSE_STATUS_SUCCESS)) {
-                    //get Json object that is inside of the 'message'
-                    JSONArray tickets = new JSONArray(json.getString(RESPONSE_MESSAGE_TAG));
-                    if (tickets.length() > 0) {
-                        mAllSearchResults = new ArrayList<>();
-                        //assign the strings to values
-                        for (int i = 0; i < tickets.length(); i++) {
-                            //create new HashMap on each loop, so the same keys can be re-used
-                            HashMap<String, String> singleResult = new HashMap<>();
-                            //get result
-                            JSONObject result = tickets.getJSONObject(i);
-                            //put result into HashMap
-                            singleResult.put("ticket", result.getString(TICKET_NUMBER_TAG));
-                            singleResult.put("user", result.getString(USERNAME_TAG));
-                            singleResult.put("project", result.getString(PROJECT_NUMBER_TAG));
-                            singleResult.put("well", result.getString(WELLNAME_TAG));
-                            singleResult.put("description", result.getString(DESCRIPTION_TAG));
-                            singleResult.put("bill", result.getString(BILLING_TAG));
-                            singleResult.put("sDate", result.getString(DATE_START_TAG));
-                            singleResult.put("eDate", result.getString(DATE_END_TAG));
-                            singleResult.put("sTime", result.getString(TIME_START_TAG));
-                            singleResult.put("eTime", result.getString(TIME_END_TAG));
-                            singleResult.put("location", result.getString(LOCATION_TAG));
-                            singleResult.put("sMile", result.getString(MILEAGE_START_TAG));
-                            singleResult.put("eMile", result.getString(MILEAGE_END_TAG));
-                            singleResult.put("gps", result.getString(GPS_TAG));
-                            //put HashMap into ArrayList
-                            mAllSearchResults.add(singleResult);
-                            // mark success
-                            searchResultMessage = "Search Complete";
-                        }
-                    } else {
-                        // mark no results
-                        searchResultMessage = "No Results Found";
-                    }
-                } else {
-                    // mark no results
-                    searchResultMessage = "No Results Found";
+                //create and add search params
+                List<NameValuePair> params = new ArrayList<>();
+                params.add(new BasicNameValuePair("userName", loggedInUser));
+                params.add(new BasicNameValuePair("dateStart", FNValidate.validateDateTime(mDateStart.getText().toString())));
+                params.add(new BasicNameValuePair("dateEnd", FNValidate.validateDateTime(mDateEnd.getText().toString())));
+                params.add(new BasicNameValuePair("customerKey", productKey));
+
+
+                // build FNRequest
+                FNRequest request = FNRequest.newBuilder()
+                        .setRequestType(FNRequestType.SEARCH)
+                        .setRequestingUser(loggedInUser)
+                        .setProductKey(productKey)
+                        .setRequestParams(params)
+                        .build();
+
+                // use request service to send request to FNP
+                FNResponse response = FNRequestService.sendRequest(request);
+
+                if (response.getResponseType().equals(FNReponseType.SUCCESS)) {
+                    mAllSearchResults = response.getResultList();
                 }
+
+                return response.getMessage();
             } catch (JSONException e) {
                 e.printStackTrace();
-                //shouldnt reach this, something's wrong wth the php
-                Log.e("JSON Exeption", "getting JSON array from josn object");
+            } catch (IllegalArgumentException ex) {
+                return "Please enter date range";
             }
-
-
-            // sends message to onPostExecute
-            return searchResultMessage;
+            return null;
         }
 
         /**
          * Once the background process mInputStream done we need to Dismiss the progress
          * dialog before leaving activity
          **/
+
         protected void onPostExecute(String message) {
             // dismiss progress bar
             if (mProgressDialog.isShowing()) {
@@ -224,8 +174,6 @@ public class SearchFieldNote extends Fragment {
             }
             // manually layout search result into List adapter
             if (message.equals("Search Complete")) {
-
-                //TODO: create custom ListAdapter
                 //clear the listview
                 mListView.setAdapter(null);
                 final ListAdapter searchAdapter = new SimpleAdapter(getActivity(), mAllSearchResults,

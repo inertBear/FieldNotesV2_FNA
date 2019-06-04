@@ -2,10 +2,13 @@ package com.fieldnotes.fna.view;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,15 +24,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.fieldnotes.fna.constants.FNAConstants.PREFS_NAME;
-import static com.fieldnotes.fna.constants.FNAConstants.PREF_CUSTOMER_KEY;
-import static com.fieldnotes.fna.constants.FNConstants.HTTP_REQUEST_METHOD_POST;
-import static com.fieldnotes.fna.constants.FNConstants.PRODUCT_KEY_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.REGISTER_URL;
-import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_MESSAGE_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_STATUS_SUCCESS;
-import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_STATUS_TAG;
-
 /**
  * Created by DevHunter
  * on 10/3/2018.
@@ -39,8 +33,15 @@ public class RegisterProduct extends AppCompatActivity {
 
     private ProgressDialog mProgressDialog;
     private JSONParser mJsonParser;
+
     private TextView mRegistrationCodeTv;
     private Button mSubmitBtn;
+
+    private static final String REGISTER_URL = "http://www.fieldnotesfn.com/FN_PROCESSOR/FN_register.php";
+    public static final String PREFS_NAME = "fnPrefFile";
+    public static final String PREF_CUSTOMER_KEY = "customerkey";
+    private static final String TAG_STATUS = "status";
+    private static final String TAG_MESSAGE = "message";
 
     public RegisterProduct() {
         mJsonParser = new JSONParser();
@@ -108,12 +109,12 @@ public class RegisterProduct extends AppCompatActivity {
             try {
                 // convert to List of params
                 List<NameValuePair> params = new ArrayList<>();
-                params.add(new BasicNameValuePair(PRODUCT_KEY_TAG, customerKey));
+                params.add(new BasicNameValuePair("customerKey", customerKey));
                 // make HTTP connection
-                JSONObject json = mJsonParser.createHttpRequest(REGISTER_URL, HTTP_REQUEST_METHOD_POST, params);
-                status = json.getString(RESPONSE_STATUS_TAG);
+                JSONObject json = mJsonParser.createHttpRequest(REGISTER_URL, "POST", params);
+                status = json.getString(TAG_STATUS);
                 // check return value from PHP
-                if (status.equals(RESPONSE_STATUS_SUCCESS)) {
+                if (status.equals("success")) {
                     //save customer code to preferences
                     getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                             .edit()
@@ -123,10 +124,10 @@ public class RegisterProduct extends AppCompatActivity {
                     Intent ii = new Intent(RegisterProduct.this, Login.class);
                     startActivity(ii);
                     finish();
-                    return json.getString(RESPONSE_MESSAGE_TAG);
+                    return json.getString(TAG_MESSAGE);
                 } else {
                     // failed register - bad code entered
-                    return json.getString(RESPONSE_MESSAGE_TAG);
+                    return json.getString(TAG_MESSAGE);
                 }
             } catch (JSONException e) {
                 // JSON exception - should never be reached

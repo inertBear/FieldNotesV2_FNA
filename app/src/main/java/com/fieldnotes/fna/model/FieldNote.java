@@ -25,8 +25,8 @@ public class FieldNote {
     //private String mGPS;
 
     private FieldNote(String creator, String project, String wellName, String location, String billing, String startDate,
-                     String endDate, String startTime, String endTime, String mileageStart,
-                     String mileageEnd, String description) {
+                      String endDate, String startTime, String endTime, String mileageStart,
+                      String mileageEnd, String description) {
         this.mCreator = creator;
         this.mProject = project;
         this.mWellName = wellName;
@@ -114,7 +114,7 @@ public class FieldNote {
         //TODO: GPS object
         private String sGPS;
 
-        public FieldNoteBuilder(){
+        public FieldNoteBuilder() {
 
         }
 
@@ -153,12 +153,12 @@ public class FieldNote {
             return this;
         }
 
-        public FieldNoteBuilder setTimeStart(String timeStart){
+        public FieldNoteBuilder setTimeStart(String timeStart) {
             this.sStartTime = timeStart;
             return this;
         }
 
-        public FieldNoteBuilder setTimeEnd(String timeEnd){
+        public FieldNoteBuilder setTimeEnd(String timeEnd) {
             this.sEndTime = timeEnd;
             return this;
         }
@@ -178,7 +178,7 @@ public class FieldNote {
             return this;
         }
 
-        public FieldNoteBuilder setGPS(String gps){
+        public FieldNoteBuilder setGPS(String gps) {
             this.sGPS = gps;
             return this;
         }

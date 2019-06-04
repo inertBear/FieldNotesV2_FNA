@@ -12,7 +12,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +26,13 @@ import android.widget.Toast;
 
 import com.fieldnotes.fna.R;
 import com.fieldnotes.fna.gps.SelfLocator;
+import com.fieldnotes.fna.model.FNReponseType;
+import com.fieldnotes.fna.model.FNRequest;
+import com.fieldnotes.fna.model.FNRequestType;
+import com.fieldnotes.fna.model.FNResponse;
 import com.fieldnotes.fna.model.FieldNote;
 import com.fieldnotes.fna.parser.JSONParser;
+import com.fieldnotes.fna.service.FNRequestService;
 import com.fieldnotes.fna.validation.FNValidate;
 import com.fieldnotes.fna.view.adapters.HintAdapter;
 import com.fieldnotes.fna.view.datetime.SelectDateFragment;
@@ -37,45 +41,25 @@ import com.fieldnotes.fna.view.datetime.SelectTimeFragment;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.fieldnotes.fna.constants.FNAConstants.BILLING_CODE_ARRAY;
-import static com.fieldnotes.fna.constants.FNAConstants.LOCATION_ARRAY;
-import static com.fieldnotes.fna.constants.FNAConstants.PREFS_NAME;
-import static com.fieldnotes.fna.constants.FNAConstants.PREF_CUSTOMER_KEY;
-import static com.fieldnotes.fna.constants.FNConstants.ADD_NOTE_URL;
-import static com.fieldnotes.fna.constants.FNConstants.BILLING_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.DATE_END_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.DATE_START_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.DESCRIPTION_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.GPS_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.HTTP_REQUEST_METHOD_POST;
-import static com.fieldnotes.fna.constants.FNConstants.LOCATION_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.MILEAGE_END_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.MILEAGE_START_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.PRODUCT_KEY_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.PROJECT_NUMBER_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_MESSAGE_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_STATUS_SUCCESS;
-import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_STATUS_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.TIME_END_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.TIME_START_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.USERNAME_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.WELLNAME_TAG;
+import static com.fieldnotes.fna.view.Login.PREFS_NAME;
+import static com.fieldnotes.fna.view.Login.PREF_CUSTOMER_KEY;
 
 /**
  * Created by DevHunter on 5/3/2018.
  */
 
 public class AddFieldNote extends Fragment {
-
+    // there is no way to implement a "spinner hint" with using an Android resource array
+    private static final String[] LOCATION_ARRAY = new String[]{"Field", "Office", "Shop", "N/A", "Location"};
+    private static final String[] BILLING_CODE_ARRAY = new String[]{"Billable", "Not Billable", "Turn-key", "N/A", "Billing"};
+    // AsyncTask
     private ProgressDialog mProgressDialog;
-    private JSONParser mJsonParser;
-
+    // Views
     private View mFocusView;
     private EditText mProjectName;
     private EditText mWellName;
@@ -92,10 +76,6 @@ public class AddFieldNote extends Fragment {
     private FloatingActionButton mAddButton;
 
     private String mCurrentLocation = "0,0";
-
-    public AddFieldNote() {
-        mJsonParser = new JSONParser();
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -223,8 +203,6 @@ public class AddFieldNote extends Fragment {
 
     class FieldNoteAdd extends AsyncTask<String, String, String> {
 
-        private String LOG_TAG = "FieldNoteAdd";
-
         /**
          * Before starting background thread Show Progress Dialog
          **/
@@ -240,8 +218,6 @@ public class AddFieldNote extends Fragment {
 
         @Override
         protected String doInBackground(String... strings) {
-            FieldNote fieldNote = null;
-
             //get values from view
             String loggedInUser = Login.getLoggedInUser();
             String wellName = mWellName.getText().toString();
@@ -256,78 +232,51 @@ public class AddFieldNote extends Fragment {
             String billingCode = mBillingCode.getSelectedItem().toString();
             String location = mLocation.getSelectedItem().toString();
 
+            //get customer key from preferences
+            SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            String productKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+
             try {
-                //build FieldNote
-                fieldNote = new FieldNote.FieldNoteBuilder()
-                        .setCreator(loggedInUser)
-                        .setProject(FNValidate.validate(project))
-                        .setWellname(FNValidate.validate(wellName))
-                        .setLocation(FNValidate.validateSpinner(location))
-                        .setBilling(FNValidate.validateSpinner(billingCode))
-                        .setDateStart(FNValidate.validateDateTime(dateStart))
-                        .setDateEnd(FNValidate.validateDateTime(dateEnd))
-                        .setTimeStart(FNValidate.validateDateTime(timeStart))
-                        .setTimeEnd(FNValidate.validateDateTime(timeEnd))
-                        .setMileageStart(FNValidate.validateInt(mileageStart))
-                        .setMileageEnd(FNValidate.validateInt(mileageEnd))
-                        .setDescription(FNValidate.validate(description))
-                        .build();
-
-            } catch (final Exception e) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getActivity(), e.getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            //TODO: convert the FieldNote object to JSON and sent that instead of this
-            if (fieldNote != null) {
-
-                //get customer key from preferences
-                SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-                String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
-
-                //load params/value pairs into List
+                // convert to list of params
                 List<NameValuePair> params = new ArrayList<>();
-                params.add(new BasicNameValuePair(USERNAME_TAG, fieldNote.getCreator()));
-                params.add(new BasicNameValuePair(WELLNAME_TAG, fieldNote.getWellName()));
-                params.add(new BasicNameValuePair(DATE_START_TAG, fieldNote.getStartDate()));
-                params.add(new BasicNameValuePair(TIME_START_TAG, fieldNote.getStartTime()));
-                params.add(new BasicNameValuePair(MILEAGE_START_TAG, fieldNote.getMileageStart()));
-                params.add(new BasicNameValuePair(DESCRIPTION_TAG, fieldNote.getDescription()));
-                params.add(new BasicNameValuePair(MILEAGE_END_TAG, fieldNote.getMileageEnd()));
-                params.add(new BasicNameValuePair(DATE_END_TAG, fieldNote.getEndDate()));
-                params.add(new BasicNameValuePair(TIME_END_TAG, fieldNote.getEndTime()));
-                params.add(new BasicNameValuePair(PROJECT_NUMBER_TAG, fieldNote.getProject()));
-                params.add(new BasicNameValuePair(BILLING_TAG, fieldNote.getBilling()));
-                params.add(new BasicNameValuePair(LOCATION_TAG, fieldNote.getLocation()));
+                params.add(new BasicNameValuePair("userName", loggedInUser));
+                params.add(new BasicNameValuePair("wellName", FNValidate.validate(wellName)));
+                params.add(new BasicNameValuePair("dateStart", FNValidate.validateDateTime(dateStart)));
+                params.add(new BasicNameValuePair("timeStart", FNValidate.validateDateTime(timeStart)));
+                params.add(new BasicNameValuePair("mileageStart", FNValidate.validateInt(mileageStart)));
+                params.add(new BasicNameValuePair("description", FNValidate.validate(description)));
+                params.add(new BasicNameValuePair("mileageEnd", FNValidate.validateInt(mileageEnd)));
+                params.add(new BasicNameValuePair("dateEnd", FNValidate.validateDateTime(dateEnd)));
+                params.add(new BasicNameValuePair("timeEnd", FNValidate.validateDateTime(timeEnd)));
+                params.add(new BasicNameValuePair("projectNumber", FNValidate.validate(project)));
+                params.add(new BasicNameValuePair("billing", FNValidate.validateSpinner(billingCode)));
+                params.add(new BasicNameValuePair("location", FNValidate.validateSpinner(location)));
                 if (mGpsCheckbox.isChecked()) {
                     mCurrentLocation = SelfLocator.getCurrentLocation();
                 }
-                params.add(new BasicNameValuePair(GPS_TAG, mCurrentLocation));
-                params.add(new BasicNameValuePair(PRODUCT_KEY_TAG, customerKey));
+                params.add(new BasicNameValuePair("gps", mCurrentLocation));
+                params.add(new BasicNameValuePair("customerKey", productKey));
 
-                try {
-                    //send params and get JSONObject response
-                    JSONObject json = mJsonParser.createHttpRequest(ADD_NOTE_URL, HTTP_REQUEST_METHOD_POST, params);
-                    String status = json.getString(RESPONSE_STATUS_TAG);
-                    if (status.equals(RESPONSE_STATUS_SUCCESS)) {
-                        // return to default activity
-                        Intent ii = new Intent(getActivity(), Welcome.class);
-                        startActivity(ii);
-                        getActivity().finish();
-                        return json.getString(RESPONSE_MESSAGE_TAG);
-                    } else {
-                        //add failure
-                        return json.getString(RESPONSE_MESSAGE_TAG);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.v(LOG_TAG, "JSONException -> check FieldNotes webservice");
+                // build FNRequest
+                FNRequest request = FNRequest.newBuilder()
+                        .setRequestType(FNRequestType.ADD)
+                        .setRequestingUser(loggedInUser)
+                        .setProductKey(productKey)
+                        .setRequestParams(params)
+                        .build();
+
+                // use request service to send request to FNP
+                FNResponse response = FNRequestService.sendRequest(request);
+
+                if (response.getResponseType().equals(FNReponseType.SUCCESS)) {
+                    // return to default activity
+                    Intent ii = new Intent(getActivity(), Welcome.class);
+                    startActivity(ii);
+                    getActivity().finish();
                 }
+                return response.getMessage();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
             return null;
         }
@@ -345,6 +294,7 @@ public class AddFieldNote extends Fragment {
                 Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
             }
         }
+
     }
 
     @Override

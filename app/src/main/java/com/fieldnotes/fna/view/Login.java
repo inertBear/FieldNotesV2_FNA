@@ -12,35 +12,28 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.fieldnotes.fna.R;
-import com.fieldnotes.fna.parser.JSONParser;
+import com.fieldnotes.fna.model.FNReponseType;
+import com.fieldnotes.fna.model.FNRequest;
+import com.fieldnotes.fna.model.FNRequestType;
+import com.fieldnotes.fna.model.FNResponse;
+import com.fieldnotes.fna.service.FNRequestService;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.fieldnotes.fna.constants.FNAConstants.PREFS_NAME;
-import static com.fieldnotes.fna.constants.FNAConstants.PREF_CUSTOMER_KEY;
-import static com.fieldnotes.fna.constants.FNAConstants.PREF_PASSWORD;
-import static com.fieldnotes.fna.constants.FNAConstants.PREF_REMEMBER_LOGIN;
-import static com.fieldnotes.fna.constants.FNAConstants.PREF_USERNAME;
-import static com.fieldnotes.fna.constants.FNConstants.HTTP_REQUEST_METHOD_POST;
-import static com.fieldnotes.fna.constants.FNConstants.LOGIN_URL;
-import static com.fieldnotes.fna.constants.FNConstants.PRODUCT_KEY_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_MESSAGE_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_STATUS_SUCCESS;
-import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_STATUS_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.USER_PASSWORD_TAG;
-import static com.fieldnotes.fna.constants.FNConstants.USER_USERNAME_TAG;
-
 public class Login extends AppCompatActivity {
-
+    public static final String PREFS_NAME = "fnPrefFile";
+    private static final String PREF_USERNAME = "username";
+    private static final String PREF_PASSWORD = "password";
+    public static final String PREF_CUSTOMER_KEY = "customerkey";
     public static String mUserName = "";
+    // AsyncTask
     private ProgressDialog mProgressDialog;
-    private JSONParser mJsonParser = new JSONParser();
+    // Views
     private EditText mUserNameET;
     private EditText mPasswordET;
     private Button mButtonLogin;
@@ -49,19 +42,17 @@ public class Login extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_login);
-
         //customize actionbar
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.drawable.fn_icon);
         getSupportActionBar().setTitle("");
-
         // get views
         mUserNameET = findViewById(R.id.UsernameET);
         mPasswordET = findViewById(R.id.PasswordET);
 
         // check preferences and auto-fill login form
         SharedPreferences pref = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        boolean autolog = pref.getBoolean(PREF_REMEMBER_LOGIN, false);
+        boolean autolog = pref.getBoolean("RememberLogin", false);
         String username = pref.getString(PREF_USERNAME, null);
         String password = pref.getString(PREF_PASSWORD, null);
         if (autolog) {
@@ -76,13 +67,7 @@ public class Login extends AppCompatActivity {
         mButtonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switch (v.getId()) {
-                    case R.id.LoginButton:
-                        new AttemptLogin().execute();
-                        break;
-                    default:
-                        break;
-                }
+                new AttemptLogin().execute();
             }
         });
 
@@ -129,37 +114,42 @@ public class Login extends AppCompatActivity {
          */
         @Override
         protected String doInBackground(String... args) {
-            String status;
             // get login strings
             String username = mUserNameET.getText().toString();
             String password = mPasswordET.getText().toString();
 
             //get customer key from preferences
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+            String productKey = prefs.getString(PREF_CUSTOMER_KEY, "");
 
             try {
                 // convert to List of params
                 List<NameValuePair> params = new ArrayList<>();
-                params.add(new BasicNameValuePair(USER_USERNAME_TAG, username));
-                params.add(new BasicNameValuePair(USER_PASSWORD_TAG, password));
-                params.add(new BasicNameValuePair(PRODUCT_KEY_TAG, customerKey));
-                // make HTTP connection
-                JSONObject json = mJsonParser.createHttpRequest(LOGIN_URL, HTTP_REQUEST_METHOD_POST, params);
-                status = json.getString(RESPONSE_STATUS_TAG);
+                params.add(new BasicNameValuePair("userUserName", username));
+                params.add(new BasicNameValuePair("userPassword", password));
+                params.add(new BasicNameValuePair("customerKey", productKey));
+
+                // build FNRequest
+                FNRequest request = FNRequest.newBuilder()
+                        .setRequestType(FNRequestType.LOGIN)
+                        .setRequestingUser(username)
+                        .setProductKey(productKey)
+                        .setRequestParams(params)
+                        .build();
+
+                // use request service to send request to FNP
+                FNResponse response = FNRequestService.sendRequest(request);
+
                 // check return value from PHP
-                if (status.equals(RESPONSE_STATUS_SUCCESS)) {
+                if (response.getResponseType().equals(FNReponseType.SUCCESS)) {
+
                     // successful Login
                     Intent ii = new Intent(Login.this, Welcome.class);
                     startActivity(ii);
                     finish();
-                    return json.getString(RESPONSE_MESSAGE_TAG);
-                } else {
-                    // failed login - bad username/password
-                    return json.getString(RESPONSE_MESSAGE_TAG);
                 }
+                return response.getMessage();
             } catch (JSONException e) {
-                // JSON exception - should never be reached
                 e.printStackTrace();
             }
             return null;
