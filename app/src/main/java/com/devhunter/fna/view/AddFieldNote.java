@@ -12,7 +12,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +26,13 @@ import android.widget.Toast;
 
 import com.devhunter.fna.R;
 import com.devhunter.fna.gps.SelfLocator;
+import com.devhunter.fna.model.FNReponseType;
+import com.devhunter.fna.model.FNRequest;
+import com.devhunter.fna.model.FNRequestType;
+import com.devhunter.fna.model.FNResponse;
 import com.devhunter.fna.model.FieldNote;
 import com.devhunter.fna.parser.JSONParser;
+import com.devhunter.fna.service.FNRequestService;
 import com.devhunter.fna.validation.FNValidate;
 import com.devhunter.fna.view.adapters.HintAdapter;
 import com.devhunter.fna.view.datetime.SelectDateFragment;
@@ -37,7 +41,6 @@ import com.devhunter.fna.view.datetime.SelectTimeFragment;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,18 +54,12 @@ import static com.devhunter.fna.view.Login.PREF_CUSTOMER_KEY;
  */
 
 public class AddFieldNote extends Fragment {
-
-    private static final String ADD_NOTE_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_addNote.php";
-    private static final String TAG = "AddFieldNote";
-    private static final String TAG_SUCCESS = "success";
-    private static final String TAG_MESSAGE = "message";
     // there is no way to implement a "spinner hint" with using an Android resource array
     private static final String[] locationArray = new String[]{"Field", "Office", "Shop", "N/A", "Location"};
     private static final String[] billingCodeArray = new String[]{"Billable", "Not Billable", "Turn-key", "N/A", "Billing"};
-
+    // AsyncTask
     private ProgressDialog mProgressDialog;
-    private JSONParser mJsonParser;
-
+    // Views
     private View mFocusView;
     private EditText mProjectName;
     private EditText mWellName;
@@ -79,10 +76,6 @@ public class AddFieldNote extends Fragment {
     private FloatingActionButton mAddButton;
 
     private String mCurrentLocation = "0,0";
-
-    public AddFieldNote() {
-        mJsonParser = new JSONParser();
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -106,10 +99,10 @@ public class AddFieldNote extends Fragment {
         mFocusView = view.findViewById(R.id.focus_view);
         mFocusView.requestFocus();
 
-        mProjectName = (EditText) view.findViewById(R.id.projectName);
-        mWellName = (EditText) view.findViewById(R.id.wellName);
-        mDescription = (EditText) view.findViewById(R.id.description);
-        mDateStart = (EditText) view.findViewById(R.id.dateStart);
+        mProjectName = view.findViewById(R.id.projectName);
+        mWellName = view.findViewById(R.id.wellName);
+        mDescription = view.findViewById(R.id.description);
+        mDateStart = view.findViewById(R.id.dateStart);
         mDateStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -117,7 +110,7 @@ public class AddFieldNote extends Fragment {
                 dateFragment.show(getFragmentManager(), "DatePicker");
             }
         });
-        mTimeStart = (EditText) view.findViewById(R.id.timeStart);
+        mTimeStart = view.findViewById(R.id.timeStart);
         mTimeStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -125,7 +118,7 @@ public class AddFieldNote extends Fragment {
                 timeFragment.show(getFragmentManager(), "TimePicker");
             }
         });
-        mDateEnd = (EditText) view.findViewById(R.id.dateEnd);
+        mDateEnd = view.findViewById(R.id.dateEnd);
         mDateEnd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -133,7 +126,7 @@ public class AddFieldNote extends Fragment {
                 dateFragment.show(getFragmentManager(), "DatePicker");
             }
         });
-        mTimeEnd = (EditText) view.findViewById(R.id.timeEnd);
+        mTimeEnd = view.findViewById(R.id.timeEnd);
         mTimeEnd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -141,7 +134,7 @@ public class AddFieldNote extends Fragment {
                 timeFragment.show(getFragmentManager(), "TimePicker");
             }
         });
-        mLocation = (Spinner) view.findViewById(R.id.location);
+        mLocation = view.findViewById(R.id.location);
         final HintAdapter hintAdapter = new HintAdapter(getActivity(), R.layout.layout_spinner_item, locationArray);
         mLocation.setAdapter(hintAdapter);
         mLocation.setSelection(hintAdapter.getCount());
@@ -159,7 +152,7 @@ public class AddFieldNote extends Fragment {
             }
         });
 
-        mBillingCode = (Spinner) getView().findViewById(R.id.billingCode);
+        mBillingCode = getView().findViewById(R.id.billingCode);
         final HintAdapter hintAdapter2 = new HintAdapter(getActivity(), R.layout.layout_spinner_item, billingCodeArray);
         mBillingCode.setAdapter(hintAdapter2);
         mBillingCode.setSelection(hintAdapter2.getCount());
@@ -177,11 +170,11 @@ public class AddFieldNote extends Fragment {
             }
         });
 
-        mMileageStart = (EditText) getView().findViewById(R.id.mileageStart);
-        mMileageEnd = (EditText) getView().findViewById(R.id.mileageEnd);
-        mAddButton = (FloatingActionButton) getView().findViewById(R.id.addButton);
+        mMileageStart = getView().findViewById(R.id.mileageStart);
+        mMileageEnd = getView().findViewById(R.id.mileageEnd);
+        mAddButton = getView().findViewById(R.id.addButton);
 
-        mGpsCheckbox = (CheckBox) getView().findViewById(R.id.gpsCheckbox);
+        mGpsCheckbox = getView().findViewById(R.id.gpsCheckbox);
         mGpsCheckbox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -210,8 +203,6 @@ public class AddFieldNote extends Fragment {
 
     class FieldNoteAdd extends AsyncTask<String, String, String> {
 
-        private String LOG_TAG = "FieldNoteAdd";
-
         /**
          * Before starting background thread Show Progress Dialog
          **/
@@ -227,8 +218,6 @@ public class AddFieldNote extends Fragment {
 
         @Override
         protected String doInBackground(String... strings) {
-            FieldNote fieldNote = null;
-
             //get values from view
             String loggedInUser = Login.getLoggedInUser();
             String wellName = mWellName.getText().toString();
@@ -245,76 +234,49 @@ public class AddFieldNote extends Fragment {
 
             //get customer key from preferences
             SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+            String productKey = prefs.getString(PREF_CUSTOMER_KEY, "");
 
             try {
-                //build FieldNote
-                fieldNote = new FieldNote.FieldNoteBuilder()
-                        .setCreator(loggedInUser)
-                        .setProject(FNValidate.validate(project))
-                        .setWellname(FNValidate.validate(wellName))
-                        .setLocation(FNValidate.validateSpinner(location))
-                        .setBilling(FNValidate.validateSpinner(billingCode))
-                        .setDateStart(FNValidate.validateDateTime(dateStart))
-                        .setDateEnd(FNValidate.validateDateTime(dateEnd))
-                        .setTimeStart(FNValidate.validateDateTime(timeStart))
-                        .setTimeEnd(FNValidate.validateDateTime(timeEnd))
-                        .setMileageStart(FNValidate.validateInt(mileageStart))
-                        .setMileageEnd(FNValidate.validateInt(mileageEnd))
-                        .setDescription(FNValidate.validate(description))
-                        .build();
-
-            } catch (final Exception e) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getActivity(), e.getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            //TODO: convert the FieldNote object to JSON and sent that instead of this
-            if (fieldNote != null) {
-                //load params/value pairs into List
+                // convert to list of params
                 List<NameValuePair> params = new ArrayList<>();
-                params.add(new BasicNameValuePair("userName", fieldNote.getCreator()));
-                params.add(new BasicNameValuePair("wellName", fieldNote.getWellName()));
-                params.add(new BasicNameValuePair("dateStart", fieldNote.getStartDate()));
-                params.add(new BasicNameValuePair("timeStart", fieldNote.getStartTime()));
-                params.add(new BasicNameValuePair("mileageStart", fieldNote.getMileageStart()));
-                params.add(new BasicNameValuePair("description", fieldNote.getDescription()));
-                params.add(new BasicNameValuePair("mileageEnd", fieldNote.getMileageEnd()));
-                params.add(new BasicNameValuePair("dateEnd", fieldNote.getEndDate()));
-                params.add(new BasicNameValuePair("timeEnd", fieldNote.getEndTime()));
-                params.add(new BasicNameValuePair("projectNumber", fieldNote.getProject()));
-                params.add(new BasicNameValuePair("billing", fieldNote.getBilling()));
-                params.add(new BasicNameValuePair("location", fieldNote.getLocation()));
+                params.add(new BasicNameValuePair("userName", loggedInUser));
+                params.add(new BasicNameValuePair("wellName", FNValidate.validate(wellName)));
+                params.add(new BasicNameValuePair("dateStart", FNValidate.validateDateTime(dateStart)));
+                params.add(new BasicNameValuePair("timeStart", FNValidate.validateDateTime(timeStart)));
+                params.add(new BasicNameValuePair("mileageStart", FNValidate.validateInt(mileageStart)));
+                params.add(new BasicNameValuePair("description", FNValidate.validate(description)));
+                params.add(new BasicNameValuePair("mileageEnd", FNValidate.validateInt(mileageEnd)));
+                params.add(new BasicNameValuePair("dateEnd", FNValidate.validateDateTime(dateEnd)));
+                params.add(new BasicNameValuePair("timeEnd", FNValidate.validateDateTime(timeEnd)));
+                params.add(new BasicNameValuePair("projectNumber", FNValidate.validate(project)));
+                params.add(new BasicNameValuePair("billing", FNValidate.validateSpinner(billingCode)));
+                params.add(new BasicNameValuePair("location", FNValidate.validateSpinner(location)));
                 if (mGpsCheckbox.isChecked()) {
                     mCurrentLocation = SelfLocator.getCurrentLocation();
                 }
                 params.add(new BasicNameValuePair("gps", mCurrentLocation));
+                params.add(new BasicNameValuePair("customerKey", productKey));
 
-                params.add(new BasicNameValuePair("customerKey", customerKey));
+                // build FNRequest
+                FNRequest request = FNRequest.newBuilder()
+                        .setRequestType(FNRequestType.ADD)
+                        .setRequestingUser(loggedInUser)
+                        .setProductKey(productKey)
+                        .setRequestParams(params)
+                        .build();
 
-                try {
-                    //send params and get JSONObject response
-                    JSONObject json = mJsonParser.createHttpRequest(ADD_NOTE_URL, "POST", params);
-                    String status = json.getString("status");
-                    if (status.equals("success")) {
-                        // return to default activity
-                        Intent ii = new Intent(getActivity(), Welcome.class);
-                        startActivity(ii);
-                        getActivity().finish();
-                        return json.getString(TAG_MESSAGE);
-                    } else {
-                        //add failure
-                        return json.getString(TAG_MESSAGE);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.v(LOG_TAG, "JSONException -> check FieldNotes webservice");
+                // use request service to send request to FNP
+                FNResponse response = FNRequestService.sendRequest(request);
+
+                if (response.getResponseType().equals(FNReponseType.SUCCESS)) {
+                    // return to default activity
+                    Intent ii = new Intent(getActivity(), Welcome.class);
+                    startActivity(ii);
+                    getActivity().finish();
                 }
+                return response.getMessage();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
             return null;
         }
@@ -332,6 +294,7 @@ public class AddFieldNote extends Fragment {
                 Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
             }
         }
+
     }
 
     @Override

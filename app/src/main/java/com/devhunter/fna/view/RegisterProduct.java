@@ -37,7 +37,7 @@ public class RegisterProduct extends AppCompatActivity {
     private TextView mRegistrationCodeTv;
     private Button mSubmitBtn;
 
-    private static final String REGISTER_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_register.php";
+    private static final String REGISTER_URL = "http://www.fieldnotesfn.com/FN_PROCESSOR/FN_register.php";
     public static final String PREFS_NAME = "fnPrefFile";
     public static final String PREF_CUSTOMER_KEY = "customerkey";
     private static final String TAG_STATUS = "status";

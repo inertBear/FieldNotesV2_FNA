@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -13,21 +12,21 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.devhunter.fna.R;
+import com.devhunter.fna.model.FNReponseType;
+import com.devhunter.fna.model.FNRequest;
+import com.devhunter.fna.model.FNRequestType;
+import com.devhunter.fna.model.FNResponse;
 import com.devhunter.fna.parser.JSONParser;
+import com.devhunter.fna.service.FNRequestService;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Login extends AppCompatActivity {
-    // static strings
-    private static final String LOGIN_URL = "http://www.fieldnotesfn.com/FNA_test/FNA_login.php";
-    private static final String TAG_STATUS = "status";
-    private static final String TAG_MESSAGE = "message";
     public static final String PREFS_NAME = "fnPrefFile";
     private static final String PREF_USERNAME = "username";
     private static final String PREF_PASSWORD = "password";
@@ -35,7 +34,6 @@ public class Login extends AppCompatActivity {
     public static String mUserName = "";
     // AsyncTask
     private ProgressDialog mProgressDialog;
-    private JSONParser mJsonParser = new JSONParser();
     // Views
     private EditText mUserNameET;
     private EditText mPasswordET;
@@ -50,8 +48,8 @@ public class Login extends AppCompatActivity {
         getSupportActionBar().setIcon(R.drawable.fn_icon);
         getSupportActionBar().setTitle("");
         // get views
-        mUserNameET = (EditText) findViewById(R.id.UsernameET);
-        mPasswordET = (EditText) findViewById(R.id.PasswordET);
+        mUserNameET = findViewById(R.id.UsernameET);
+        mPasswordET = findViewById(R.id.PasswordET);
 
         // check preferences and auto-fill login form
         SharedPreferences pref = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -66,24 +64,18 @@ public class Login extends AppCompatActivity {
         }
 
         // Login button OnClick
-        mButtonLogin = (Button) findViewById(R.id.LoginButton);
+        mButtonLogin = findViewById(R.id.LoginButton);
         mButtonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switch (v.getId()) {
-                    case R.id.LoginButton:
-                        new AttemptLogin().execute();
-                        break;
-                    default:
-                        break;
-                }
+                new AttemptLogin().execute();
             }
         });
 
         //get customer key from preferences
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
-        if(customerKey.isEmpty()){
+        if (customerKey.isEmpty()) {
             Intent openRegisterActivity = new Intent(Login.this, RegisterProduct.class);
             startActivity(openRegisterActivity);
         }
@@ -123,37 +115,42 @@ public class Login extends AppCompatActivity {
          */
         @Override
         protected String doInBackground(String... args) {
-            String status;
             // get login strings
             String username = mUserNameET.getText().toString();
             String password = mPasswordET.getText().toString();
 
             //get customer key from preferences
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String customerKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+            String productKey = prefs.getString(PREF_CUSTOMER_KEY, "");
 
             try {
                 // convert to List of params
                 List<NameValuePair> params = new ArrayList<>();
-                params.add(new BasicNameValuePair("username", username));
-                params.add(new BasicNameValuePair("password", password));
-                params.add(new BasicNameValuePair("customerKey", customerKey));
-                // make HTTP connection
-                JSONObject json = mJsonParser.createHttpRequest(LOGIN_URL, "POST", params);
-                status = json.getString(TAG_STATUS);
+                params.add(new BasicNameValuePair("userUserName", username));
+                params.add(new BasicNameValuePair("userPassword", password));
+                params.add(new BasicNameValuePair("customerKey", productKey));
+
+                // build FNRequest
+                FNRequest request = FNRequest.newBuilder()
+                        .setRequestType(FNRequestType.LOGIN)
+                        .setRequestingUser(username)
+                        .setProductKey(productKey)
+                        .setRequestParams(params)
+                        .build();
+
+                // use request service to send request to FNP
+                FNResponse response = FNRequestService.sendRequest(request);
+
                 // check return value from PHP
-                if (status.equals("success")) {
+                if (response.getResponseType().equals(FNReponseType.SUCCESS)) {
+
                     // successful Login
                     Intent ii = new Intent(Login.this, Welcome.class);
                     startActivity(ii);
                     finish();
-                    return json.getString(TAG_MESSAGE);
-                } else {
-                    // failed login - bad username/password
-                    return json.getString(TAG_MESSAGE);
                 }
+                return response.getMessage();
             } catch (JSONException e) {
-                // JSON exception - should never be reached
                 e.printStackTrace();
             }
             return null;
