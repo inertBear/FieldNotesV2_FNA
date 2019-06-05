@@ -12,6 +12,7 @@ import java.util.Map;
 public class FNResponse {
     public FNReponseType mResponseType;
     public String mMessage;
+    public String mToken;
     public ArrayList<HashMap<String, String>> mResultList;
     public Date mTimestamp;
     public Map<String, String> mMetadata;
@@ -19,6 +20,7 @@ public class FNResponse {
     public FNResponse(final FNResponse.Builder builder) {
         mResponseType = builder.responseType;
         mMessage = builder.message;
+        mToken = builder.token;
         mResultList = builder.resultList;
         mTimestamp = builder.timestamp;
         mMetadata = builder.metadata;
@@ -40,6 +42,10 @@ public class FNResponse {
         return mMessage;
     }
 
+    public String getToken() {
+        return mToken;
+    }
+
     public ArrayList<HashMap<String, String>> getResultList() {
         return mResultList;
     }
@@ -55,6 +61,7 @@ public class FNResponse {
     public static final class Builder {
         private FNReponseType responseType;
         private String message;
+        private String token;
         private ArrayList<HashMap<String, String>> resultList;
         private Date timestamp;
         private Map<String, String> metadata;
@@ -65,6 +72,7 @@ public class FNResponse {
         public Builder(final FNResponse copy) {
             responseType = copy.mResponseType;
             message = copy.mMessage;
+            token = copy.mToken;
             resultList = copy.mResultList;
             timestamp = copy.mTimestamp;
             metadata = copy.mMetadata;
@@ -77,6 +85,11 @@ public class FNResponse {
 
         public FNResponse.Builder setMessage(final String message) {
             this.message = message;
+            return this;
+        }
+
+        public FNResponse.Builder setToken(final String token) {
+            this.token = token;
             return this;
         }
 

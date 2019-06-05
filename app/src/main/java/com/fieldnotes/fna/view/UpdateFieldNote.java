@@ -29,7 +29,6 @@ import com.fieldnotes.fna.model.FNReponseType;
 import com.fieldnotes.fna.model.FNRequest;
 import com.fieldnotes.fna.model.FNRequestType;
 import com.fieldnotes.fna.model.FNResponse;
-import com.fieldnotes.fna.model.FieldNote;
 import com.fieldnotes.fna.service.FNRequestService;
 import com.fieldnotes.fna.validation.FNValidate;
 import com.fieldnotes.fna.view.adapters.HintAdapter;
@@ -46,7 +45,7 @@ import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.fieldnotes.fna.view.Login.PREFS_NAME;
-import static com.fieldnotes.fna.view.Login.PREF_CUSTOMER_KEY;
+import static com.fieldnotes.fna.view.Login.PREF_TOKEN;
 
 /**
  * Created by DevHunter on 5/8/2018.
@@ -290,7 +289,7 @@ public class UpdateFieldNote extends Fragment {
 
             // get customer key from preferences
             SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String productKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+            String productKey = prefs.getString(PREF_TOKEN, "");
 
             try {
                 // convert to List of params

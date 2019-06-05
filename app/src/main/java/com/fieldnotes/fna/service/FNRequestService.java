@@ -25,6 +25,7 @@ public class FNRequestService {
 
     private static final String TAG_STATUS = "status";
     private static final String TAG_MESSAGE = "message";
+    private static final String TAG_TOKEN = "token";
 
     public static FNResponse sendRequest(FNRequest request) throws JSONException {
         JSONParser mJsonParser = new JSONParser();
@@ -34,9 +35,11 @@ public class FNRequestService {
             case LOGIN:
                 json = mJsonParser.createHttpRequest(LOGIN_URL, HTTP_METHOD_POST, request.getRequestParams());
 
+                // TODO: we DON'T want it to succeed if there is no token
                 return FNResponse.newBuilder()
                         .setStatustype(convertResponseType(json.getString(TAG_STATUS)))
                         .setMessage(json.getString(TAG_MESSAGE))
+                        .setToken(json.getString(TAG_TOKEN))
                         .build();
             case ADD:
                 json = mJsonParser.createHttpRequest(ADD_NOTE_URL, HTTP_METHOD_POST, request.getRequestParams());

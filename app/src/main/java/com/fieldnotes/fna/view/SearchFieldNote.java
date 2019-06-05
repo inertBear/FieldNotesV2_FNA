@@ -37,7 +37,7 @@ import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.fieldnotes.fna.view.Login.PREFS_NAME;
-import static com.fieldnotes.fna.view.Login.PREF_CUSTOMER_KEY;
+import static com.fieldnotes.fna.view.Login.PREF_TOKEN;
 
 /**
  * Created on 5/3/2018.
@@ -127,7 +127,7 @@ public class SearchFieldNote extends Fragment {
             //get customer key from preferences
             String loggedInUser = Login.getLoggedInUser();
             SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String productKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+            String productKey = prefs.getString(PREF_TOKEN, "");
 
             try {
                 //create and add search params
