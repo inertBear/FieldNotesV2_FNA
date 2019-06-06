@@ -2,13 +2,10 @@ package com.fieldnotes.fna.view;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,10 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by DevHunter
- * on 10/3/2018.
+ * UNUSED, but saved - registration has been temporarily removed from the working app
  */
-
 public class RegisterProduct extends AppCompatActivity {
 
     private ProgressDialog mProgressDialog;

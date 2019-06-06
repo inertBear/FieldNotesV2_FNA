@@ -10,7 +10,7 @@ import java.util.Map;
  */
 
 public class FNResponse {
-    public FNReponseType mResponseType;
+    public FNResponseType mResponseType;
     public String mMessage;
     public String mToken;
     public ArrayList<HashMap<String, String>> mResultList;
@@ -34,7 +34,7 @@ public class FNResponse {
         return new FNResponse.Builder(copy);
     }
 
-    public FNReponseType getResponseType() {
+    public FNResponseType getResponseType() {
         return mResponseType;
     }
 
@@ -59,7 +59,7 @@ public class FNResponse {
     }
 
     public static final class Builder {
-        private FNReponseType responseType;
+        private FNResponseType responseType;
         private String message;
         private String token;
         private ArrayList<HashMap<String, String>> resultList;
@@ -78,7 +78,7 @@ public class FNResponse {
             metadata = copy.mMetadata;
         }
 
-        public FNResponse.Builder setStatustype(final FNReponseType responseType) {
+        public FNResponse.Builder setStatustype(final FNResponseType responseType) {
             this.responseType = responseType;
             return this;
         }

@@ -1,8 +1,7 @@
 package com.fieldnotes.fna.view;
 
-import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -19,7 +18,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fieldnotes.fna.R;
-import com.fieldnotes.fna.model.FNReponseType;
+import com.fieldnotes.fna.asynctask.FNAsyncTask;
+import com.fieldnotes.fna.model.FNResponseType;
 import com.fieldnotes.fna.model.FNRequest;
 import com.fieldnotes.fna.model.FNRequestType;
 import com.fieldnotes.fna.model.FNResponse;
@@ -36,21 +36,18 @@ import java.util.HashMap;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.fieldnotes.fna.view.Login.PREFS_NAME;
-import static com.fieldnotes.fna.view.Login.PREF_TOKEN;
-
-/**
- * Created on 5/3/2018.
- */
+import static com.fieldnotes.fna.constants.FNAConstants.PREFS_NAME;
+import static com.fieldnotes.fna.constants.FNAConstants.PREF_TOKEN;
+import static com.fieldnotes.fna.constants.FNAConstants.PREF_USERNAME;
+import static com.fieldnotes.fna.constants.FNConstants.DATE_END_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.DATE_START_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.TOKEN_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.USER_TAG;
 
 public class SearchFieldNote extends Fragment {
-    private ProgressDialog mProgressDialog;
-    // Views
     private TextView mDateStart;
     private TextView mDateEnd;
     private ListView mListView;
-    private Button mSearchButton;
-
     private ArrayList<HashMap<String, String>> mAllSearchResults;
 
     @Override
@@ -92,64 +89,53 @@ public class SearchFieldNote extends Fragment {
             }
         });
 
-        mSearchButton = view.findViewById(R.id.searchButton);
-        mSearchButton.setOnClickListener(new View.OnClickListener() {
+        Button searchButton = view.findViewById(R.id.searchButton);
+        searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new FieldNotesSearch().execute();
+                new SearchNoteAsyncTask(getContext()).execute();
             }
         });
     }
 
     /**
+     * Asynchronous SearchNote with progress bar
+     * <p>
      * This class runs a background thread to search for field notes created by the logged in user
      * by a date range. Results are listed as fully qualified results. These results can be selected
      * by the user to edit the values within each note
      */
+    class SearchNoteAsyncTask extends FNAsyncTask {
 
-    class FieldNotesSearch extends AsyncTask<String, String, String> {
-        /**
-         * Before starting background thread Show Progress Dialog
-         **/
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // create progress bar
-            mProgressDialog = new ProgressDialog(getActivity());
-            mProgressDialog.setMessage("Searching FieldNotes...");
-            mProgressDialog.setIndeterminate(false);
-            mProgressDialog.setCancelable(true);
-            mProgressDialog.show();
+        SearchNoteAsyncTask(Context context) {
+            super(context);
         }
 
         @Override
         protected String doInBackground(String... strings) {
-            //get customer key from preferences
-            String loggedInUser = Login.getLoggedInUser();
-            SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String productKey = prefs.getString(PREF_TOKEN, "");
+            //get values from preferences
+            SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            String username = prefs.getString(PREF_USERNAME, "");
+            String token = prefs.getString(PREF_TOKEN, "");
 
             try {
-                //create and add search params
+                // create search params
                 List<NameValuePair> params = new ArrayList<>();
-                params.add(new BasicNameValuePair("userName", loggedInUser));
-                params.add(new BasicNameValuePair("dateStart", FNValidate.validateDateTime(mDateStart.getText().toString())));
-                params.add(new BasicNameValuePair("dateEnd", FNValidate.validateDateTime(mDateEnd.getText().toString())));
-                params.add(new BasicNameValuePair("customerKey", productKey));
-
+                params.add(new BasicNameValuePair(USER_TAG, username));
+                params.add(new BasicNameValuePair(DATE_START_TAG, FNValidate.validateDateTime(mDateStart.getText().toString())));
+                params.add(new BasicNameValuePair(DATE_END_TAG, FNValidate.validateDateTime(mDateEnd.getText().toString())));
+                params.add(new BasicNameValuePair(TOKEN_TAG, token));
 
                 // build FNRequest
                 FNRequest request = FNRequest.newBuilder()
                         .setRequestType(FNRequestType.SEARCH)
-                        .setRequestingUser(loggedInUser)
-                        .setProductKey(productKey)
                         .setRequestParams(params)
                         .build();
 
                 // use request service to send request to FNP
                 FNResponse response = FNRequestService.sendRequest(request);
 
-                if (response.getResponseType().equals(FNReponseType.SUCCESS)) {
+                if (response.getResponseType().equals(FNResponseType.SUCCESS)) {
                     mAllSearchResults = response.getResultList();
                 }
 
@@ -163,10 +149,10 @@ public class SearchFieldNote extends Fragment {
         }
 
         /**
-         * Once the background process mInputStream done we need to Dismiss the progress
-         * dialog before leaving activity
+         * after the search results have been received, set list adapter with search results and set
+         * onClickListener to Edit Note Fragment
          **/
-
+        @Override
         protected void onPostExecute(String message) {
             // dismiss progress bar
             if (mProgressDialog.isShowing()) {

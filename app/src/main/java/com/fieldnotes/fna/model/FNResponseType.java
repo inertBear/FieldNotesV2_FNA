@@ -4,7 +4,7 @@ package com.fieldnotes.fna.model;
  * Enums for Response type
  */
 
-public enum FNReponseType {
+public enum FNResponseType {
     SUCCESS,
     FAILURE
 }

@@ -1,6 +1,5 @@
 package com.fieldnotes.fna.asynctask;
 
-import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -10,9 +9,8 @@ import android.widget.Toast;
  * Abstract Class for an Asynchronous Task to FNP
  */
 public class FNAsyncTask extends AsyncTask<String, String, String> {
-    @SuppressLint("StaticFieldLeak")
     private static Context mContext;
-    private ProgressDialog mProgressDialog;
+    protected ProgressDialog mProgressDialog;
 
     public FNAsyncTask(Context context) {
         mContext = context;

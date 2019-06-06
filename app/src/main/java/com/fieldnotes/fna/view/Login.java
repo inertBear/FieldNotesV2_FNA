@@ -1,6 +1,5 @@
 package com.fieldnotes.fna.view;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,7 +11,7 @@ import android.widget.EditText;
 
 import com.fieldnotes.fna.R;
 import com.fieldnotes.fna.asynctask.FNAsyncTask;
-import com.fieldnotes.fna.model.FNReponseType;
+import com.fieldnotes.fna.model.FNResponseType;
 import com.fieldnotes.fna.model.FNRequest;
 import com.fieldnotes.fna.model.FNRequestType;
 import com.fieldnotes.fna.model.FNResponse;
@@ -25,14 +24,15 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Login extends AppCompatActivity {
-    public static final String PREFS_NAME = "FNPrefs";
-    private static final String PREF_USERNAME = "username";
-    private static final String PREF_PASSWORD = "password";
-    public static final String PREF_TOKEN = "productToken";
-    public static String mUserName = "";
+import static com.fieldnotes.fna.constants.FNAConstants.PREFS_NAME;
+import static com.fieldnotes.fna.constants.FNAConstants.PREF_AUTOLOG;
+import static com.fieldnotes.fna.constants.FNAConstants.PREF_PASSWORD;
+import static com.fieldnotes.fna.constants.FNAConstants.PREF_TOKEN;
+import static com.fieldnotes.fna.constants.FNAConstants.PREF_USERNAME;
+import static com.fieldnotes.fna.constants.FNConstants.USERNAME_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.USER_PASSWORD_TAG;
 
-    // Views
+public class Login extends AppCompatActivity {
     private EditText mUserNameET;
     private EditText mPasswordET;
 
@@ -64,10 +64,9 @@ public class Login extends AppCompatActivity {
     /**
      * Asynchronous login with progress bar
      */
-    @SuppressLint("StaticFieldLeak")
     class LoginAsyncTask extends FNAsyncTask {
 
-        LoginAsyncTask(Context context){
+        LoginAsyncTask(Context context) {
             super(context);
         }
 
@@ -84,8 +83,8 @@ public class Login extends AppCompatActivity {
             String password = mPasswordET.getText().toString();
 
             List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair("UserName", username));
-            params.add(new BasicNameValuePair("UserPassword", password));
+            params.add(new BasicNameValuePair(USERNAME_TAG, username));
+            params.add(new BasicNameValuePair(USER_PASSWORD_TAG, password));
 
             // build request
             FNRequest request = FNRequest.newBuilder()
@@ -96,10 +95,7 @@ public class Login extends AppCompatActivity {
                 // send request to FNP
                 FNResponse response = FNRequestService.sendRequest(request);
 
-                if (response.getResponseType().equals(FNReponseType.SUCCESS)) {
-                    // save username for app functions
-                    mUserName = mUserNameET.getText().toString();
-
+                if (response.getResponseType().equals(FNResponseType.SUCCESS)) {
                     // save login preferences
                     getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
                             .putString(PREF_USERNAME, username)
@@ -107,7 +103,7 @@ public class Login extends AppCompatActivity {
                             .putString(PREF_TOKEN, response.getToken())
                             .apply();
 
-                    // Navigate to Welcome View
+                    // navigate to Welcome View
                     Intent ii = new Intent(Login.this, Welcome.class);
                     startActivity(ii);
                     finish();
@@ -121,21 +117,12 @@ public class Login extends AppCompatActivity {
     }
 
     /**
-     * retrieves the username of the logged in user
-     *
-     * @return
-     */
-    public static String getLoggedInUser() {
-        return mUserName;
-    }
-
-    /**
      * automatically fill the username and password if stored in preferences
      */
-    private void checkAutoLogin(){
+    private void checkAutoLogin() {
         // check for auto-login
         SharedPreferences pref = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        boolean autolog = pref.getBoolean("RememberLogin", false);
+        boolean autolog = pref.getBoolean(PREF_AUTOLOG, false);
         String username = pref.getString(PREF_USERNAME, null);
         String password = pref.getString(PREF_PASSWORD, null);
         if (autolog) {
