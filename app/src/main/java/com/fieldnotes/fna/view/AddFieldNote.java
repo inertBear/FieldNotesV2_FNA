@@ -274,22 +274,10 @@ public class AddFieldNote extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-//        // prevent leaks
-//        if (mProgressDialog != null) {
-//            if (mProgressDialog.isShowing()) {
-//                mProgressDialog.dismiss();
-//            }
-//        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-//        // prevent leaks
-//        if (mProgressDialog != null) {
-//            if (mProgressDialog.isShowing()) {
-//                mProgressDialog.dismiss();
-//            }
-//        }
     }
 }

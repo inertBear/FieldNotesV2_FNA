@@ -95,20 +95,20 @@ public class FNRequestService {
                             //get result
                             JSONObject result = tickets.getJSONObject(i);
                             // map the result
-                            singleResult.put("ticket", result.getString(TICKET_NUMBER_TAG));
-                            singleResult.put("user", result.getString(USER_TAG));
-                            singleResult.put("project", result.getString(PROJECT_NUMBER_TAG));
-                            singleResult.put("well", result.getString(WELLNAME_TAG));
-                            singleResult.put("description", result.getString(DESCRIPTION_TAG));
-                            singleResult.put("bill", result.getString(BILLING_TAG));
-                            singleResult.put("sDate", result.getString(DATE_START_TAG));
-                            singleResult.put("eDate", result.getString(DATE_END_TAG));
-                            singleResult.put("sTime", result.getString(TIME_START_TAG));
-                            singleResult.put("eTime", result.getString(TIME_END_TAG));
-                            singleResult.put("location", result.getString(LOCATION_TAG));
-                            singleResult.put("sMile", result.getString(MILEAGE_START_TAG));
-                            singleResult.put("eMile", result.getString(MILEAGE_END_TAG));
-                            singleResult.put("gps", result.getString(GPS_TAG));
+                            singleResult.put(TICKET_NUMBER_TAG, result.getString(TICKET_NUMBER_TAG));
+                            singleResult.put(USER_TAG, result.getString(USER_TAG));
+                            singleResult.put(PROJECT_NUMBER_TAG, result.getString(PROJECT_NUMBER_TAG));
+                            singleResult.put(WELLNAME_TAG, result.getString(WELLNAME_TAG));
+                            singleResult.put(DESCRIPTION_TAG, result.getString(DESCRIPTION_TAG));
+                            singleResult.put(BILLING_TAG, result.getString(BILLING_TAG));
+                            singleResult.put(DATE_START_TAG, result.getString(DATE_START_TAG));
+                            singleResult.put(DATE_END_TAG, result.getString(DATE_END_TAG));
+                            singleResult.put(TIME_START_TAG, result.getString(TIME_START_TAG));
+                            singleResult.put(TIME_END_TAG, result.getString(TIME_END_TAG));
+                            singleResult.put(LOCATION_TAG, result.getString(LOCATION_TAG));
+                            singleResult.put(MILEAGE_START_TAG, result.getString(MILEAGE_START_TAG));
+                            singleResult.put(MILEAGE_END_TAG, result.getString(MILEAGE_END_TAG));
+                            singleResult.put(GPS_TAG, result.getString(GPS_TAG));
                             //put HashMap into ArrayList
                             allSearchResults.add(singleResult);
                         }

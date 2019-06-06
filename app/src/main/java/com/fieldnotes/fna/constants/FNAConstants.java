@@ -15,6 +15,6 @@ public class FNAConstants {
 
     // FNA static Arrays
     // NOTE: there is no way to implement a "spinner hint" with using an Android resource array
-    public static final String[] LOCATION_ARRAY = new String[]{"Field", "Office", "Shop", "N/A", "Location"};
-    public static final String[] BILLING_CODE_ARRAY = new String[]{"Billable", "Not Billable", "Turn-key", "N/A", "Billing"};
+    public static final String[] LOCATION_ARRAY = new String[]{"Field", "Office", "Shop", "Not Set", "Location"};
+    public static final String[] BILLING_CODE_ARRAY = new String[]{"Billable", "Not Billable", "Turn-key", "Not Set", "Billing"};
 }

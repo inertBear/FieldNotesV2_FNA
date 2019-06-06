@@ -3,7 +3,6 @@ package com.fieldnotes.fna.constants;
 public class FNConstants {
 
     // JSON Data tags
-    public static final String PRODUCT_KEY_TAG = "customerKey";
     public static final String TICKET_NUMBER_TAG = "ticketNumber";
     public static final String USER_TAG = "userName";
     public static final String WELLNAME_TAG = "wellName";

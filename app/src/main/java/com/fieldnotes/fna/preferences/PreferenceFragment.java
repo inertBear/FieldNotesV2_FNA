@@ -30,7 +30,7 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
             view.setBackgroundColor(getResources().getColor(android.R.color.white));
         }
         // Remember Login preference
-        mRememberLogin = (SwitchPreferenceCompat) findPreference(PREF_AUTOLOG);
+        mRememberLogin = (SwitchPreferenceCompat) findPreference("remember_login");
         mRememberLogin.setChecked(getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(PREF_AUTOLOG, false));
         mRememberLogin.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override

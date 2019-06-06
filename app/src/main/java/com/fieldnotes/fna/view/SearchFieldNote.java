@@ -39,10 +39,21 @@ import static android.content.Context.MODE_PRIVATE;
 import static com.fieldnotes.fna.constants.FNAConstants.PREFS_NAME;
 import static com.fieldnotes.fna.constants.FNAConstants.PREF_TOKEN;
 import static com.fieldnotes.fna.constants.FNAConstants.PREF_USERNAME;
+import static com.fieldnotes.fna.constants.FNConstants.BILLING_TAG;
 import static com.fieldnotes.fna.constants.FNConstants.DATE_END_TAG;
 import static com.fieldnotes.fna.constants.FNConstants.DATE_START_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.DESCRIPTION_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.GPS_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.LOCATION_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.MILEAGE_END_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.MILEAGE_START_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.PROJECT_NUMBER_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.TICKET_NUMBER_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.TIME_END_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.TIME_START_TAG;
 import static com.fieldnotes.fna.constants.FNConstants.TOKEN_TAG;
 import static com.fieldnotes.fna.constants.FNConstants.USER_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.WELLNAME_TAG;
 
 public class SearchFieldNote extends Fragment {
     private TextView mDateStart;
@@ -163,9 +174,9 @@ public class SearchFieldNote extends Fragment {
                 //clear the listview
                 mListView.setAdapter(null);
                 final ListAdapter searchAdapter = new SimpleAdapter(getActivity(), mAllSearchResults,
-                        R.layout.layout_search_list_item, new String[]{"ticket", "user",
-                        "project", "well", "description", "bill", "sDate", "eDate", "sTime", "eTime",
-                        "location", "sMile", "eMile", "gps"}, new int[]{R.id.resultTicket, R.id.resultUser,
+                        R.layout.layout_search_list_item, new String[]{TICKET_NUMBER_TAG, USER_TAG,
+                        PROJECT_NUMBER_TAG, WELLNAME_TAG, DESCRIPTION_TAG, BILLING_TAG, DATE_START_TAG, DATE_END_TAG, TIME_START_TAG, TIME_END_TAG,
+                        LOCATION_TAG, MILEAGE_START_TAG, MILEAGE_END_TAG, GPS_TAG}, new int[]{R.id.resultTicket, R.id.resultUser,
                         R.id.resultProject, R.id.resultWell, R.id.resultDescription, R.id.resultBilling,
                         R.id.resultDateStart, R.id.resultDateEnd, R.id.resultTimeStart, R.id.resultTimeEnd,
                         R.id.resultLocation, R.id.resultMileStart, R.id.resultMileEnd, R.id.resultGps});
@@ -177,7 +188,7 @@ public class SearchFieldNote extends Fragment {
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         //user motion to edit data
                         HashMap<String, String> selectedValue = (HashMap) searchAdapter.getItem(position);
-                        Toast.makeText(getActivity(), "Edit ticket " + selectedValue.get("ticket"), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "Edit ticket " + selectedValue.get(TICKET_NUMBER_TAG), Toast.LENGTH_SHORT).show();
                         // set extra args for update fragment
                         UpdateFieldNote updateFragment = new UpdateFieldNote();
                         Bundle args = new Bundle();

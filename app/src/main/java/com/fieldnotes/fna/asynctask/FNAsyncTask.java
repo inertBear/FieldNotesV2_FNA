@@ -3,12 +3,13 @@ package com.fieldnotes.fna.asynctask;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.view.Gravity;
 import android.widget.Toast;
 
 /**
  * Abstract Class for an Asynchronous Task to FNP
  */
-public class FNAsyncTask extends AsyncTask<String, String, String> {
+public abstract class FNAsyncTask extends AsyncTask<String, String, String> {
     private static Context mContext;
     protected ProgressDialog mProgressDialog;
 
@@ -30,14 +31,14 @@ public class FNAsyncTask extends AsyncTask<String, String, String> {
         mProgressDialog.show();
     }
 
+    /**
+     * Describes what the async class will do in the background
+     */
     @Override
-    protected String doInBackground(String... args) {
-        return null;
-    }
-
+    protected abstract String doInBackground(String... args);
 
     /**
-     * Dismiss the progress bar
+     * Dismiss the progress bar, and display response message as a toast
      **/
     protected void onPostExecute(String message) {
         super.onPostExecute(message);
@@ -47,7 +48,9 @@ public class FNAsyncTask extends AsyncTask<String, String, String> {
         }
         // display response message
         if (message != null) {
-            Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
+            Toast toast = Toast.makeText(mContext.getApplicationContext(), message, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.BOTTOM|Gravity.CENTER, 0, 0);
+            toast.show();
         }
     }
 }
