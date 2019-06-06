@@ -1,11 +1,10 @@
 package com.fieldnotes.fna.view;
 
 import android.Manifest;
-import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -21,15 +20,14 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.fieldnotes.fna.R;
+import com.fieldnotes.fna.asynctask.FNAsyncTask;
 import com.fieldnotes.fna.gps.SelfLocator;
-import com.fieldnotes.fna.model.FNReponseType;
 import com.fieldnotes.fna.model.FNRequest;
 import com.fieldnotes.fna.model.FNRequestType;
 import com.fieldnotes.fna.model.FNResponse;
-import com.fieldnotes.fna.model.FieldNote;
+import com.fieldnotes.fna.model.FNResponseType;
 import com.fieldnotes.fna.service.FNRequestService;
 import com.fieldnotes.fna.validation.FNValidate;
 import com.fieldnotes.fna.view.adapters.HintAdapter;
@@ -45,21 +43,29 @@ import java.util.HashMap;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.fieldnotes.fna.view.Login.PREFS_NAME;
-import static com.fieldnotes.fna.view.Login.PREF_CUSTOMER_KEY;
-
-/**
- * Created by DevHunter on 5/8/2018.
- */
+import static com.fieldnotes.fna.constants.FNAConstants.BILLING_CODE_ARRAY;
+import static com.fieldnotes.fna.constants.FNAConstants.LOCATION_ARRAY;
+import static com.fieldnotes.fna.constants.FNAConstants.PREFS_NAME;
+import static com.fieldnotes.fna.constants.FNAConstants.PREF_TOKEN;
+import static com.fieldnotes.fna.constants.FNAConstants.PREF_USERNAME;
+import static com.fieldnotes.fna.constants.FNConstants.BILLING_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.DATE_END_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.DATE_START_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.DESCRIPTION_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.GPS_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.LOCATION_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.MILEAGE_END_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.MILEAGE_START_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.PROJECT_NUMBER_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.TICKET_NUMBER_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.TIME_END_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.TIME_START_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.TOKEN_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.USER_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.WELLNAME_TAG;
 
 public class UpdateFieldNote extends Fragment {
-    // there is no way to implement a "spinner hint" with using an Android resource array
-    private final String[] locationArray = new String[]{"Field", "Office", "Shop", "N/A", "Location"};
-    private final String[] billingCodeArray = new String[]{"Billable", "Not Billable", "Turn-key", "N/A", "Billing"};
 
-    private ProgressDialog mProgressDialog;
-
-    private View mFocusView;
     private EditText mProjectName;
     private EditText mWellName;
     private EditText mDescription;
@@ -72,11 +78,9 @@ public class UpdateFieldNote extends Fragment {
     private EditText mMileageStart;
     private EditText mMileageEnd;
     private CheckBox mGpsCheckBox;
-    private FloatingActionButton mUpdateButton;
 
     private HashMap<String, String> mOldData;
-
-    private String mCurrentLocation = "0,0";
+    private String mCurrentLocation = "LOCATION NOT SET";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,12 +102,12 @@ public class UpdateFieldNote extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         // define views
-        mFocusView = getView().findViewById(R.id.edit_focus_view);
-        mFocusView.requestFocus();
-        mProjectName = getView().findViewById(R.id.projectName);
-        mWellName = getView().findViewById(R.id.wellName);
-        mDescription = getView().findViewById(R.id.description);
-        mDateStart = getView().findViewById(R.id.dateStart);
+        View focusView = view.findViewById(R.id.edit_focus_view);
+        focusView.requestFocus();
+        mProjectName = view.findViewById(R.id.projectName);
+        mWellName = view.findViewById(R.id.wellName);
+        mDescription = view.findViewById(R.id.description);
+        mDateStart = view.findViewById(R.id.dateStart);
         mDateStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -111,7 +115,7 @@ public class UpdateFieldNote extends Fragment {
                 dateFragment.show(getFragmentManager(), "DatePicker");
             }
         });
-        mTimeStart = getView().findViewById(R.id.timeStart);
+        mTimeStart = view.findViewById(R.id.timeStart);
         mTimeStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -119,7 +123,7 @@ public class UpdateFieldNote extends Fragment {
                 timeFragment.show(getFragmentManager(), "TimePicker");
             }
         });
-        mDateEnd = getView().findViewById(R.id.dateEnd);
+        mDateEnd = view.findViewById(R.id.dateEnd);
         mDateEnd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -127,7 +131,7 @@ public class UpdateFieldNote extends Fragment {
                 dateFragment.show(getFragmentManager(), "DatePicker");
             }
         });
-        mTimeEnd = getView().findViewById(R.id.timeEnd);
+        mTimeEnd = view.findViewById(R.id.timeEnd);
         mTimeEnd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -135,17 +139,17 @@ public class UpdateFieldNote extends Fragment {
                 timeFragment.show(getFragmentManager(), "TimePicker");
             }
         });
-        mMileageStart = getView().findViewById(R.id.mileageStart);
-        mMileageEnd = getView().findViewById(R.id.mileageEnd);
+        mMileageStart = view.findViewById(R.id.mileageStart);
+        mMileageEnd = view.findViewById(R.id.mileageEnd);
 
-        mLocation = getView().findViewById(R.id.update_location);
-        final HintAdapter hintAdapter = new HintAdapter(getActivity(), R.layout.layout_spinner_item, locationArray);
-        mLocation.setAdapter(hintAdapter);
-        mLocation.setSelection(hintAdapter.getCount());
+        mLocation = view.findViewById(R.id.update_location);
+        final HintAdapter locationHintAdapter = new HintAdapter(getActivity(), R.layout.layout_spinner_item, LOCATION_ARRAY);
+        mLocation.setAdapter(locationHintAdapter);
+        mLocation.setSelection(locationHintAdapter.getCount());
         mLocation.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position < hintAdapter.getCount()) {
+                if (position < locationHintAdapter.getCount()) {
                     TextView tv = (TextView) view;
                     tv.setTextColor(getResources().getColor(R.color.colorBlack));
                 }
@@ -156,14 +160,14 @@ public class UpdateFieldNote extends Fragment {
             }
         });
 
-        mBillingCode = getView().findViewById(R.id.update_billingCode);
-        final HintAdapter hintAdapter2 = new HintAdapter(getActivity(), R.layout.layout_spinner_item, billingCodeArray);
-        mBillingCode.setAdapter(hintAdapter2);
-        mBillingCode.setSelection(hintAdapter2.getCount());
+        mBillingCode = view.findViewById(R.id.update_billingCode);
+        final HintAdapter billingHintAdapter = new HintAdapter(getActivity(), R.layout.layout_spinner_item, BILLING_CODE_ARRAY);
+        mBillingCode.setAdapter(billingHintAdapter);
+        mBillingCode.setSelection(billingHintAdapter.getCount());
         mBillingCode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position < hintAdapter2.getCount()) {
+                if (position < billingHintAdapter.getCount()) {
                     TextView tv = (TextView) view;
                     tv.setTextColor(getResources().getColor(R.color.colorBlack));
                 }
@@ -174,7 +178,7 @@ public class UpdateFieldNote extends Fragment {
             }
         });
 
-        mGpsCheckBox = getView().findViewById(R.id.gpsCheckbox);
+        mGpsCheckBox = view.findViewById(R.id.gpsCheckbox);
         mGpsCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -189,62 +193,13 @@ public class UpdateFieldNote extends Fragment {
             }
         });
 
-        mUpdateButton = getView().findViewById(R.id.addButton);
+        populateViewsFromOldData();
 
-
-        //TODO: encapsulate this to a SpinnerHint Class
-        // in-app conversions (billing)
-        String bill = mOldData.get("bill");
-        int bill_position;
-        switch (bill) {
-            case "Billable":
-                bill_position = 0;
-                break;
-            case "Not Billable":
-                bill_position = 1;
-                break;
-            case "Turn-key":
-                bill_position = 2;
-                break;
-            default:
-                bill_position = 3;
-                break;
-        }
-        // in-app conversions (location)
-        String location = mOldData.get("location");
-        int location_position;
-        switch (location) {
-            case "Field":
-                location_position = 0;
-                break;
-            case "Office":
-                location_position = 1;
-                break;
-            case "Shop":
-                location_position = 2;
-                break;
-            default:
-                location_position = 3;
-                break;
-        }
-
-        //set the original values of edit fields to retrieved values
-        mProjectName.setText(mOldData.get("project"));
-        mWellName.setText(mOldData.get("well"));
-        mDescription.setText(mOldData.get("description"));
-        mBillingCode.setSelection(bill_position);
-        mDateStart.setText(mOldData.get("sDate"));
-        mTimeStart.setText(mOldData.get("sTime"));
-        mDateEnd.setText(mOldData.get("eDate"));
-        mTimeEnd.setText(mOldData.get("eTime"));
-        mLocation.setSelection(location_position);
-        mMileageStart.setText(mOldData.get("sMile"));
-        mMileageEnd.setText(mOldData.get("eMile"));
-
-        mUpdateButton.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton updateButton = view.findViewById(R.id.addButton);
+        updateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new FieldNoteUpdate().execute();
+                new UpdateNoteAsyncTask(getContext()).execute();
             }
         });
     }
@@ -256,26 +211,15 @@ public class UpdateFieldNote extends Fragment {
 
     //TODO: duplicate code here and in FieldNoteUpdate. Extract these two locations to a single "AddUpdateFieldNote" class
 
-    class FieldNoteUpdate extends AsyncTask<String, String, String> {
+    class UpdateNoteAsyncTask extends FNAsyncTask {
 
-        /**
-         * Before starting background thread Show Progress Dialog
-         **/
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // create progress bar
-            mProgressDialog = new ProgressDialog(getActivity());
-            mProgressDialog.setMessage("Updating FieldNote...");
-            mProgressDialog.setIndeterminate(false);
-            mProgressDialog.setCancelable(true);
-            mProgressDialog.show();
+        UpdateNoteAsyncTask(Context context) {
+            super(context);
         }
 
         @Override
         protected String doInBackground(String... strings) {
             //get values from view
-            String loggedInUser = Login.getLoggedInUser();
             String wellName = mWellName.getText().toString();
             String dateStart = mDateStart.getText().toString();
             String timeStart = mTimeStart.getText().toString();
@@ -290,42 +234,43 @@ public class UpdateFieldNote extends Fragment {
 
             // get customer key from preferences
             SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String productKey = prefs.getString(PREF_CUSTOMER_KEY, "");
+            String username = prefs.getString(PREF_USERNAME, "");
+            String token = prefs.getString(PREF_TOKEN, "");
 
             try {
                 // convert to List of params
                 List<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair("userName", loggedInUser));
-                params.add(new BasicNameValuePair("wellName", FNValidate.validate(wellName)));
-                params.add(new BasicNameValuePair("dateStart", FNValidate.validateDateTime(dateStart)));
-                params.add(new BasicNameValuePair("timeStart", FNValidate.validateDateTime(timeStart)));
-                params.add(new BasicNameValuePair("mileageStart", FNValidate.validateInt(mileageStart)));
-                params.add(new BasicNameValuePair("description", FNValidate.validate(description)));
-                params.add(new BasicNameValuePair("mileageEnd", FNValidate.validateInt(mileageEnd)));
-                params.add(new BasicNameValuePair("dateEnd", FNValidate.validateDateTime(dateEnd)));
-                params.add(new BasicNameValuePair("timeEnd", FNValidate.validateDateTime(timeEnd)));
-                params.add(new BasicNameValuePair("projectNumber", FNValidate.validate(project)));
-                params.add(new BasicNameValuePair("billing", FNValidate.validateSpinner(billingCode)));
-                params.add(new BasicNameValuePair("location", FNValidate.validateSpinner(location)));
+                params.add(new BasicNameValuePair(USER_TAG, username));
+                params.add(new BasicNameValuePair(WELLNAME_TAG, FNValidate.validate(wellName)));
+                params.add(new BasicNameValuePair(DATE_START_TAG, FNValidate.validateDateTime(dateStart)));
+                params.add(new BasicNameValuePair(TIME_START_TAG, FNValidate.validateDateTime(timeStart)));
+                params.add(new BasicNameValuePair(MILEAGE_START_TAG, FNValidate.validateInt(mileageStart)));
+                params.add(new BasicNameValuePair(DESCRIPTION_TAG, FNValidate.validate(description)));
+                params.add(new BasicNameValuePair(MILEAGE_END_TAG, FNValidate.validateInt(mileageEnd)));
+                params.add(new BasicNameValuePair(DATE_END_TAG, FNValidate.validateDateTime(dateEnd)));
+                params.add(new BasicNameValuePair(TIME_END_TAG, FNValidate.validateDateTime(timeEnd)));
+                params.add(new BasicNameValuePair(PROJECT_NUMBER_TAG, FNValidate.validate(project)));
+                params.add(new BasicNameValuePair(BILLING_TAG, FNValidate.validateSpinner(billingCode)));
+                params.add(new BasicNameValuePair(LOCATION_TAG, FNValidate.validateSpinner(location)));
                 if (mGpsCheckBox.isChecked()) {
                     mCurrentLocation = SelfLocator.getCurrentLocation();
+                } else {
+                    mCurrentLocation = mOldData.get(GPS_TAG);
                 }
-                params.add(new BasicNameValuePair("gps", mCurrentLocation));
-                params.add(new BasicNameValuePair("ticketNumber", mOldData.get("ticket")));
-                params.add(new BasicNameValuePair("customerKey", productKey));
+                params.add(new BasicNameValuePair(GPS_TAG, mCurrentLocation));
+                params.add(new BasicNameValuePair(TICKET_NUMBER_TAG, mOldData.get(TICKET_NUMBER_TAG)));
+                params.add(new BasicNameValuePair(TOKEN_TAG, token));
 
                 // build FNRequest
                 FNRequest request = FNRequest.newBuilder()
                         .setRequestType(FNRequestType.UPDATE)
-                        .setRequestingUser(loggedInUser)
-                        .setProductKey(productKey)
                         .setRequestParams(params)
                         .build();
 
                 // use request service to send request to FNP
                 FNResponse response = FNRequestService.sendRequest(request);
 
-                if (response.getResponseType().equals(FNReponseType.SUCCESS)) {
+                if (response.getResponseType().equals(FNResponseType.SUCCESS)) {
                     // return to default activity
                     Intent ii = new Intent(getActivity(), Welcome.class);
                     startActivity(ii);
@@ -337,42 +282,56 @@ public class UpdateFieldNote extends Fragment {
             }
             return null;
         }
-
-        /**
-         * Once the background process mInputStream done we need to Dismiss the progress
-         * dialog before leaving activity
-         **/
-
-        protected void onPostExecute(String message) {
-            // dismiss progress bar
-            if (mProgressDialog.isShowing()) {
-                mProgressDialog.dismiss();
-            }
-            //update user ui
-            if (message != null) {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-            }
-        }
-
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (mProgressDialog != null) {
-            if (mProgressDialog.isShowing()) {
-                mProgressDialog.dismiss();
-            }
-        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mProgressDialog != null) {
-            if (mProgressDialog.isShowing()) {
-                mProgressDialog.dismiss();
-            }
+    }
+
+    private void populateViewsFromOldData() {
+        //set the original values of edit fields to retrieved values
+        mProjectName.setText(mOldData.get(PROJECT_NUMBER_TAG));
+        mWellName.setText(mOldData.get(WELLNAME_TAG));
+        mDescription.setText(mOldData.get(DESCRIPTION_TAG));
+        mBillingCode.setSelection(getBillingSpinnerPosition(mOldData.get(BILLING_TAG)));
+        mDateStart.setText(mOldData.get(DATE_START_TAG));
+        mTimeStart.setText(mOldData.get(TIME_START_TAG));
+        mDateEnd.setText(mOldData.get(DATE_END_TAG));
+        mTimeEnd.setText(mOldData.get(TIME_END_TAG));
+        mLocation.setSelection(getLocationSpinnerPosition(mOldData.get(LOCATION_TAG)));
+        mMileageStart.setText(mOldData.get(MILEAGE_START_TAG));
+        mMileageEnd.setText(mOldData.get(MILEAGE_END_TAG));
+    }
+
+    private int getBillingSpinnerPosition(String billingCode) {
+        switch (billingCode) {
+            case "Billable":
+                return 0;
+            case "Not Billable":
+                return 1;
+            case "Turn-key":
+                return 2;
+            default:
+                return 3;
+        }
+    }
+
+    private int getLocationSpinnerPosition(String location) {
+        switch (location) {
+            case "Field":
+                return 0;
+            case "Office":
+                return 1;
+            case "Shop":
+                return 2;
+            default:
+                return 3;
         }
     }
 }

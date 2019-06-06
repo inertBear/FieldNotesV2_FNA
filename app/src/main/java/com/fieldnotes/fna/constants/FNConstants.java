@@ -1,15 +1,10 @@
 package com.fieldnotes.fna.constants;
 
-/**
- * Created by inertbear on 10/28/18.
- */
-
 public class FNConstants {
 
     // JSON Data tags
-    public static final String PRODUCT_KEY_TAG = "customerKey";
     public static final String TICKET_NUMBER_TAG = "ticketNumber";
-    public static final String USERNAME_TAG = "userName";
+    public static final String USER_TAG = "userName";
     public static final String WELLNAME_TAG = "wellName";
     public static final String DATE_START_TAG = "dateStart";
     public static final String TIME_START_TAG = "timeStart";
@@ -22,16 +17,18 @@ public class FNConstants {
     public static final String LOCATION_TAG = "location";
     public static final String GPS_TAG = "gps";
     public static final String BILLING_TAG = "billing";
+    public static final String TOKEN_TAG = "token";
 
     // JSON User tags
-    public static final String USER_USERNAME_TAG = "userUserName";
-    public static final String USER_PASSWORD_TAG = "userPassword";
+    public static final String USERNAME_TAG = "UserName";
+    public static final String USER_PASSWORD_TAG = "UserPassword";
 
     // JSON response tags
     public static final String RESPONSE_STATUS_TAG = "status";
     public static final String RESPONSE_STATUS_SUCCESS = "success";
     public static final String RESPONSE_STATUS_FAILURE = "failure";
     public static final String RESPONSE_MESSAGE_TAG = "message";
+    public static final String RESPONSE_TOKEN_TAG = "token";
 
     // Web Service URLs
     public static final String REGISTER_URL = "http://www.fieldnotesfn.com/FN_PROCESSOR/FN_register.php";

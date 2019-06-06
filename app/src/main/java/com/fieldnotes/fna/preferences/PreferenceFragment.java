@@ -11,16 +11,10 @@ import android.view.ViewGroup;
 import com.fieldnotes.fna.R;
 
 import static android.content.Context.MODE_PRIVATE;
-
-/**
- * Created by DevHunter on 5/11/2018.
- */
+import static com.fieldnotes.fna.constants.FNAConstants.PREFS_NAME;
+import static com.fieldnotes.fna.constants.FNAConstants.PREF_AUTOLOG;
 
 public class PreferenceFragment extends PreferenceFragmentCompat {
-    // static Strings
-    public static final String PREFS_NAME = "fnPrefFile";
-    private final String REMEMBER_LOGIN_PREF = "remember_login";
-    // Views
     private SwitchPreferenceCompat mRememberLogin;
 
     @Override
@@ -36,8 +30,8 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
             view.setBackgroundColor(getResources().getColor(android.R.color.white));
         }
         // Remember Login preference
-        mRememberLogin = (SwitchPreferenceCompat) findPreference(REMEMBER_LOGIN_PREF);
-        mRememberLogin.setChecked(getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(REMEMBER_LOGIN_PREF, false));
+        mRememberLogin = (SwitchPreferenceCompat) findPreference("remember_login");
+        mRememberLogin.setChecked(getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(PREF_AUTOLOG, false));
         mRememberLogin.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -45,13 +39,13 @@ public class PreferenceFragment extends PreferenceFragmentCompat {
                     //user "turns on" switch
                     getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                             .edit()
-                            .putBoolean(REMEMBER_LOGIN_PREF, true)
+                            .putBoolean(PREF_AUTOLOG, true)
                             .apply();
                 } else {
                     // user "turns off" switch
                     getActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                             .edit()
-                            .putBoolean(REMEMBER_LOGIN_PREF, false)
+                            .putBoolean(PREF_AUTOLOG, false)
                             .apply();
                 }
                 return true;

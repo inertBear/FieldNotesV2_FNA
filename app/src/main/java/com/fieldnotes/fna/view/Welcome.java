@@ -20,10 +20,6 @@ import java.util.List;
 import static com.fieldnotes.fna.constants.FNAConstants.ADD_NOTE_FRAGMENT_TITLE;
 import static com.fieldnotes.fna.constants.FNAConstants.SEARCH_NOTE_FRAGMENT_TITLE;
 
-/**
- * Created on 5/2/2018.
- */
-
 public class Welcome extends AppCompatActivity {
 
     @Override

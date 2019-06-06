@@ -1,6 +1,6 @@
 package com.fieldnotes.fna.service;
 
-import com.fieldnotes.fna.model.FNReponseType;
+import com.fieldnotes.fna.model.FNResponseType;
 import com.fieldnotes.fna.model.FNRequest;
 import com.fieldnotes.fna.model.FNResponse;
 import com.fieldnotes.fna.parser.JSONParser;
@@ -12,19 +12,35 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.fieldnotes.fna.constants.FNConstants.ADD_NOTE_URL;
+import static com.fieldnotes.fna.constants.FNConstants.BILLING_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.DATE_END_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.DATE_START_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.DESCRIPTION_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.GPS_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.HTTP_REQUEST_METHOD_POST;
+import static com.fieldnotes.fna.constants.FNConstants.LOCATION_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.LOGIN_URL;
+import static com.fieldnotes.fna.constants.FNConstants.MILEAGE_END_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.MILEAGE_START_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.PROJECT_NUMBER_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_MESSAGE_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_STATUS_FAILURE;
+import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_STATUS_SUCCESS;
+import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_STATUS_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.RESPONSE_TOKEN_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.SEARCH_NOTES_URL;
+import static com.fieldnotes.fna.constants.FNConstants.TICKET_NUMBER_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.TIME_END_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.TIME_START_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.UPDATE_NOTE_URL;
+import static com.fieldnotes.fna.constants.FNConstants.USER_TAG;
+import static com.fieldnotes.fna.constants.FNConstants.WELLNAME_TAG;
+
 /**
  * Service for sending requests to FNP
  */
-
 public class FNRequestService {
-    private static final String LOGIN_URL = "http://www.fieldnotesfn.com/FN_PROCESSOR/FN_login.php";
-    private static final String ADD_NOTE_URL = "http://www.fieldnotesfn.com/FN_PROCESSOR/FN_addNote.php";
-    private static final String UPDATE_NOTE_URL = "http://www.fieldnotesfn.com/FN_PROCESSOR/FN_updateNote.php";
-    private static final String SEARCH_NOTE_URL = "http://www.fieldnotesfn.com/FN_PROCESSOR/FN_searchNotes.php";
-    private static final String HTTP_METHOD_POST = "POST";
-
-    private static final String TAG_STATUS = "status";
-    private static final String TAG_MESSAGE = "message";
 
     public static FNResponse sendRequest(FNRequest request) throws JSONException {
         JSONParser mJsonParser = new JSONParser();
@@ -32,35 +48,43 @@ public class FNRequestService {
 
         switch (request.getRequestType()) {
             case LOGIN:
-                json = mJsonParser.createHttpRequest(LOGIN_URL, HTTP_METHOD_POST, request.getRequestParams());
+                json = mJsonParser.createHttpRequest(LOGIN_URL, HTTP_REQUEST_METHOD_POST, request.getRequestParams());
 
-                return FNResponse.newBuilder()
-                        .setStatustype(convertResponseType(json.getString(TAG_STATUS)))
-                        .setMessage(json.getString(TAG_MESSAGE))
-                        .build();
+                if (json.getString(RESPONSE_TOKEN_TAG) != null) {
+                    return FNResponse.newBuilder()
+                            .setStatustype(convertResponseType(json.getString(RESPONSE_STATUS_TAG)))
+                            .setMessage(json.getString(RESPONSE_MESSAGE_TAG))
+                            .setToken(json.getString(RESPONSE_TOKEN_TAG))
+                            .build();
+                } else {
+                    return FNResponse.newBuilder()
+                            .setStatustype(FNResponseType.FAILURE)
+                            .setMessage("No Login Token Received")
+                            .build();
+                }
             case ADD:
-                json = mJsonParser.createHttpRequest(ADD_NOTE_URL, HTTP_METHOD_POST, request.getRequestParams());
+                json = mJsonParser.createHttpRequest(ADD_NOTE_URL, HTTP_REQUEST_METHOD_POST, request.getRequestParams());
 
                 return FNResponse.newBuilder()
-                        .setStatustype(convertResponseType(json.getString(TAG_STATUS)))
-                        .setMessage(json.getString(TAG_MESSAGE))
+                        .setStatustype(convertResponseType(json.getString(RESPONSE_STATUS_TAG)))
+                        .setMessage(json.getString(RESPONSE_MESSAGE_TAG))
                         .build();
             case UPDATE:
-                json = mJsonParser.createHttpRequest(UPDATE_NOTE_URL, HTTP_METHOD_POST, request.getRequestParams());
+                json = mJsonParser.createHttpRequest(UPDATE_NOTE_URL, HTTP_REQUEST_METHOD_POST, request.getRequestParams());
 
                 return FNResponse.newBuilder()
-                        .setStatustype(convertResponseType(json.getString(TAG_STATUS)))
-                        .setMessage(json.getString(TAG_MESSAGE))
+                        .setStatustype(convertResponseType(json.getString(RESPONSE_STATUS_TAG)))
+                        .setMessage(json.getString(RESPONSE_MESSAGE_TAG))
                         .build();
 
             case SEARCH:
-                json = mJsonParser.createHttpRequest(SEARCH_NOTE_URL, HTTP_METHOD_POST, request.getRequestParams());
+                json = mJsonParser.createHttpRequest(SEARCH_NOTES_URL, HTTP_REQUEST_METHOD_POST, request.getRequestParams());
 
                 FNResponse.Builder responseBuilder = FNResponse.newBuilder();
-                responseBuilder.setStatustype(convertResponseType(json.getString(TAG_STATUS)));
-                if (json.getString(TAG_STATUS).equals("success")) {
+                responseBuilder.setStatustype(convertResponseType(json.getString(RESPONSE_STATUS_TAG)));
+                if (json.getString(RESPONSE_STATUS_TAG).equals(RESPONSE_STATUS_SUCCESS)) {
                     //get Json object that is inside of the 'message'
-                    JSONArray tickets = new JSONArray(json.getString(TAG_MESSAGE));
+                    JSONArray tickets = new JSONArray(json.getString(RESPONSE_MESSAGE_TAG));
 
                     if (tickets.length() > 0) {
                         ArrayList<HashMap<String, String>> allSearchResults = new ArrayList<>();
@@ -71,20 +95,20 @@ public class FNRequestService {
                             //get result
                             JSONObject result = tickets.getJSONObject(i);
                             // map the result
-                            singleResult.put("ticket", result.getString("ticketNumber"));
-                            singleResult.put("user", result.getString("userName"));
-                            singleResult.put("project", result.getString("projectNumber"));
-                            singleResult.put("well", result.getString("wellName"));
-                            singleResult.put("description", result.getString("description"));
-                            singleResult.put("bill", result.getString("billing"));
-                            singleResult.put("sDate", result.getString("dateStart"));
-                            singleResult.put("eDate", result.getString("dateEnd"));
-                            singleResult.put("sTime", result.getString("timeStart"));
-                            singleResult.put("eTime", result.getString("timeEnd"));
-                            singleResult.put("location", result.getString("location"));
-                            singleResult.put("sMile", result.getString("mileageStart"));
-                            singleResult.put("eMile", result.getString("mileageEnd"));
-                            singleResult.put("gps", result.getString("gps"));
+                            singleResult.put(TICKET_NUMBER_TAG, result.getString(TICKET_NUMBER_TAG));
+                            singleResult.put(USER_TAG, result.getString(USER_TAG));
+                            singleResult.put(PROJECT_NUMBER_TAG, result.getString(PROJECT_NUMBER_TAG));
+                            singleResult.put(WELLNAME_TAG, result.getString(WELLNAME_TAG));
+                            singleResult.put(DESCRIPTION_TAG, result.getString(DESCRIPTION_TAG));
+                            singleResult.put(BILLING_TAG, result.getString(BILLING_TAG));
+                            singleResult.put(DATE_START_TAG, result.getString(DATE_START_TAG));
+                            singleResult.put(DATE_END_TAG, result.getString(DATE_END_TAG));
+                            singleResult.put(TIME_START_TAG, result.getString(TIME_START_TAG));
+                            singleResult.put(TIME_END_TAG, result.getString(TIME_END_TAG));
+                            singleResult.put(LOCATION_TAG, result.getString(LOCATION_TAG));
+                            singleResult.put(MILEAGE_START_TAG, result.getString(MILEAGE_START_TAG));
+                            singleResult.put(MILEAGE_END_TAG, result.getString(MILEAGE_END_TAG));
+                            singleResult.put(GPS_TAG, result.getString(GPS_TAG));
                             //put HashMap into ArrayList
                             allSearchResults.add(singleResult);
                         }
@@ -100,19 +124,19 @@ public class FNRequestService {
                 return responseBuilder.build();
             default:
                 return FNResponse.newBuilder()
-                        .setStatustype(FNReponseType.FAILURE)
+                        .setStatustype(FNResponseType.FAILURE)
                         .setMessage("Could not set Request Type")
                         .build();
         }
     }
 
-    private static FNReponseType convertResponseType(String status) {
+    private static FNResponseType convertResponseType(String status) {
         switch (status) {
-            case "success":
-                return FNReponseType.SUCCESS;
-            case "failure":
+            case RESPONSE_STATUS_SUCCESS:
+                return FNResponseType.SUCCESS;
+            case RESPONSE_STATUS_FAILURE:
             default:
-                return FNReponseType.FAILURE;
+                return FNResponseType.FAILURE;
         }
     }
 }
