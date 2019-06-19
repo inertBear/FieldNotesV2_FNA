@@ -6,8 +6,8 @@ android {
         applicationId "com.fieldnotes.fna"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 5
-        versionName "2.0"
+        versionCode 6
+        versionName "3.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
