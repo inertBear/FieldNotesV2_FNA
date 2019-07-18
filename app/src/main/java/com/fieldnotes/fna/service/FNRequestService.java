@@ -115,10 +115,10 @@ public class FNRequestService {
                         responseBuilder.setMessage("Search Complete");
                         responseBuilder.setResultList(allSearchResults);
                     } else {
-                        responseBuilder.setMessage("No Results Found");
+                        responseBuilder.setMessage(json.getString(RESPONSE_MESSAGE_TAG));
                     }
                 } else {
-                    responseBuilder.setMessage("Search Failed");
+                    responseBuilder.setMessage(json.getString(RESPONSE_MESSAGE_TAG));
                 }
 
                 return responseBuilder.build();
